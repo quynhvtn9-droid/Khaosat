@@ -1,6 +1,7 @@
 <!doctype html>
 <!--
-  FTEL CMS · Khảo sát cuộc đánh giá · Prototype v10.1 (21/10/2026)
+  FTEL CMS · Khảo sát cuộc đánh giá · Prototype v10.2 (21/10/2026)
+  - v10.2: tiền tố tiêu đề mail sửa thành "FTQ-<Đơn vị cấp 1>" (mailPrefix) – yêu cầu 21/10 (thay cho cấp 2 ở v10.1)
   - v10.1: tiêu đề mail khảo sát / mail nhắc bắt đầu bằng "FTQ-<Đơn vị cấp 2>" thay cho "[FTEL CMS]" (sendMail) – yêu cầu 21/10
   - v10: phân quyền xem theo yêu cầu 21/10 – Khảo sát cuộc đánh giá + Kết quả khảo sát: Admin · QLĐV Auditor (Auditor thuộc
          đơn vị mình) · QLBP Auditor (Auditor thuộc bộ phận mình) · Auditor (đơn vị mình kiểm soát); Nhập khảo sát: Admin ·
@@ -37,7 +38,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FTEL CMS · Khảo sát cuộc đánh giá · Prototype v10.1</title>
+<title>FTEL CMS · Khảo sát cuộc đánh giá · Prototype v10.2</title>
 <style>
 :root{
   --blue:#1890ff; --blue-h:#40a9ff; --link:#1b3fa0;
@@ -482,7 +483,11 @@ body{-webkit-font-smoothing:antialiased}
     <p><span class="tg yc">Yêu cầu</span> theo yêu cầu 19–21/10/2026 · <span class="tg dx2">Đề xuất</span> BA đề xuất, chờ chốt</p>
 
     <div class="chg">
-      <h4>Thay đổi v10.1 (21/10)</h4>
+      <h4>Thay đổi v10.2 (21/10)</h4>
+      <ul>
+        <li><b>Tiêu đề mail</b>: tiền tố sửa thành <b>FTQ-&lt;Đơn vị cấp 1&gt;</b> (VD của anh Hieu: FTQ-DNB; dữ liệu mẫu: FTQ-FTELBUTDDT, FTQ-PNCTNB…) thay cho Đơn vị cấp 2 ở v10.1 <span class="tg yc">Yêu cầu</span>. Đơn vị cấp 2 vẫn nằm giữa tiêu đề nên tiêu đề có đủ cả 2 cấp, không còn lặp. VD: <i>FTQ-FTELBUTDDT [Nhắc lần 1/3] Khảo sát chất lượng cuộc đánh giá – Định kỳ PQC MN 2026-047-DNI-T10 – DNI – Hạn 19/10/2026</i>. Áp dụng ở mẫu mail (Xem mail), Hộp thư giả lập, mail mở từ Nhật ký.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v10.1 (21/10)</h4>
       <ul>
         <li><b>Tiêu đề mail</b>: "[FTEL CMS]" đổi thành <b>FTQ-&lt;Đơn vị cấp 2&gt;</b> (VD <b>FTQ-DNI</b>) cho mail khảo sát và mail nhắc <span class="tg yc">Yêu cầu</span>. Áp dụng ở mẫu mail (Xem mail) và mọi chỗ hiện tiêu đề trên CMS (Hộp thư giả lập, mail mở từ Nhật ký). VD: <i>FTQ-DNI [Nhắc lần 1/3] Khảo sát chất lượng cuộc đánh giá – Định kỳ PQC MN 2026-047-DNI-T10 – DNI – Hạn 19/10/2026</i>.</li>
       </ul>
@@ -539,7 +544,7 @@ body{-webkit-font-smoothing:antialiased}
       <li><b>Kết quả khảo sát</b>: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột cố định theo mã C1–C7 (câu Góp ý luôn ở cột cuối, kể cả khi trả lời ở vị trí số 3); ô câu chọn lưu nguyên nhãn; thời gian dd/MM/yyyy HH:mm:ss. Không có cột Email, Tên và các câu cũ đã xóa. Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; tự ghi nhận quá hạn không có dòng <span class="tg dx2">Đề xuất</span>. Phân trang 10 / 20 / 50 (mặc định 20), Id tăng dần, dòng mới ở trang cuối; khung <b>Thông tin tìm kiếm</b>: Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – yêu cầu 21/10), Auditor, Đơn vị kiểm soát – lọc theo dòng báo cáo dự thảo gắn với câu trả lời (không theo chữ ở câu 1), mặc định không giới hạn thời gian; nút <b>Xuất Excel</b> cạnh Tìm kiếm (Admin / QLĐV Auditor / QLBP Auditor / Auditor) xuất đúng 10 cột, đúng kết quả đang tìm kiếm, toàn bộ các trang <span class="tg dx2">Đề xuất</span>.</li>
       <li><b>Báo cáo dự thảo</b> (màn hiện có, giữ nguyên): mỗi dòng có Đơn vị cấp 1/cấp 2 → tự sinh 1 dòng ở Khảo sát cuộc đánh giá và gửi mail khảo sát To QLBP, CC QLĐV cấp 2 + Auditor (BR01–BR02). QLBP và QLĐV cấp 2 (auditee) không vào được màn này (BR07). Dòng trống cả 2 đơn vị → không sinh (BR10 · Đề xuất).</li>
       <li><b>Sidebar</b>: QLBP và QLĐV cấp 2 (auditee) chỉ thấy KHẢO SÁT › Nhập khảo sát, không có menu BÁO CÁO (BR07); Admin thấy cả 3 màn; QLĐV Auditor / QLBP Auditor / Auditor thấy Khảo sát cuộc đánh giá và Kết quả khảo sát. Số phiếu cần khảo sát cạnh menu chỉ hiện với QLBP. Mục mờ có nhãn "Ẩn" = vai trò hiện tại không có quyền, hệ thống thật ẩn hẳn (chỉ hiện khi bật Chú thích).</li>
-      <li><b>Mail khảo sát / mail nhắc</b>: tiêu đề <b>FTQ-&lt;Đơn vị cấp 2&gt;</b> [Nhắc lần n/3] Khảo sát chất lượng cuộc đánh giá – &lt;Tên báo cáo&gt; – &lt;Đơn vị cấp 2&gt; – Hạn dd/mm/yyyy <span class="tg yc">Yêu cầu</span> (tiền tố); phần còn lại của tiêu đề và nội dung mail là mẫu <span class="tg dx2">Đề xuất</span>. Trang 403: câu thông báo theo màn bị chặn, nút về màn chính của vai trò <span class="tg dx2">Đề xuất</span>.</li>
+      <li><b>Mail khảo sát / mail nhắc</b>: tiêu đề <b>FTQ-&lt;Đơn vị cấp 1&gt;</b> [Nhắc lần n/3] Khảo sát chất lượng cuộc đánh giá – &lt;Tên báo cáo&gt; – &lt;Đơn vị cấp 2&gt; – Hạn dd/mm/yyyy <span class="tg yc">Yêu cầu</span> (tiền tố); phần còn lại của tiêu đề và nội dung mail là mẫu <span class="tg dx2">Đề xuất</span>. Trang 403: câu thông báo theo màn bị chặn, nút về màn chính của vai trò <span class="tg dx2">Đề xuất</span>.</li>
     </ul>
     <div class="shortcut"><b>Lối tắt kiểm thử</b> (mở bằng vai trò đang chọn, không có quyền → 403): <span class="lk" data-act="nav" data-k="baocao">Báo cáo dự thảo</span> · <span class="lk" data-act="nav" data-k="khaosat">Khảo sát cuộc đánh giá</span> · <span class="lk" data-act="nav" data-k="nhapks">Nhập khảo sát</span> · <span class="lk" data-act="nav" data-k="ketqua">Kết quả khảo sát</span> · <span class="lk" data-act="seeresult">Kết quả khảo sát bằng vai trò Admin</span></div>
 
@@ -593,7 +598,7 @@ body{-webkit-font-smoothing:antialiased}
     <h4>Quy tắc</h4>
     <ol class="br">
       <li><b>BR01</b> <span class="tg yc">Yêu cầu</span> Mỗi dòng báo cáo dự thảo (Tên báo cáo + Đơn vị cấp 1 + Đơn vị cấp 2) → tự sinh 1 dòng khảo sát, trạng thái <i>Chưa khảo sát</i>.</li>
-      <li><b>BR02</b> <span class="tg yc">Yêu cầu</span> Sinh dòng khảo sát → gửi mail khảo sát <b>To: QLBP (auditee)</b>, <b>CC: QLĐV cấp 2 (auditee) + Auditor</b>. Mail có <b>cảnh báo</b>: quá 5 ngày không nhập, hệ thống tự ghi nhận "5-Rất hài lòng". <span class="tg yc">Yêu cầu 21/10</span> Tiêu đề mail khảo sát và mail nhắc bắt đầu bằng <b>FTQ-&lt;Đơn vị cấp 2&gt;</b> (VD FTQ-DNI), thay cho [FTEL CMS]. <span class="tg dx2">Đề xuất</span> Mail nhắc cũng có cảnh báo; link trong mail mở thẳng phiếu sau khi đăng nhập; dòng không có Đơn vị cấp 2 → tiền tố lấy Đơn vị cấp 1.</li>
+      <li><b>BR02</b> <span class="tg yc">Yêu cầu</span> Sinh dòng khảo sát → gửi mail khảo sát <b>To: QLBP (auditee)</b>, <b>CC: QLĐV cấp 2 (auditee) + Auditor</b>. Mail có <b>cảnh báo</b>: quá 5 ngày không nhập, hệ thống tự ghi nhận "5-Rất hài lòng". <span class="tg yc">Yêu cầu 21/10</span> Tiêu đề mail khảo sát và mail nhắc bắt đầu bằng <b>FTQ-&lt;Đơn vị cấp 1&gt;</b> (VD FTQ-DNB; dữ liệu mẫu FTQ-FTELBUTDDT), thay cho [FTEL CMS]. <span class="tg dx2">Đề xuất</span> Mail nhắc cũng có cảnh báo; link trong mail mở thẳng phiếu sau khi đăng nhập; dòng không có Đơn vị cấp 1 → tiền tố lấy Đơn vị cấp 2.</li>
       <li><b>BR03</b> <span class="tg yc">Yêu cầu</span> Hạn khảo sát = ngày gửi + 5 ngày (VD gửi 05/10 → hạn 10/10). <span class="tg dx2">Đề xuất</span> Ngày gửi = ngày 0; tính ngày lịch; hết hạn lúc 23:59 ngày hạn.</li>
       <li><b>BR04</b> <span class="tg yc">Yêu cầu</span> Chưa khảo sát → nhắc <b>từ ngày thứ 2 đến ngày thứ 4</b>, To/CC như BR02; đơn vị đã khảo sát → ngừng nhắc. <span class="tg dx2">Đề xuất</span> Gửi 05/10 → nhắc 07, 08, 09/10 lúc 08:00, tối đa 3 lần.</li>
       <li><b>BR05</b> <span class="tg yc">Yêu cầu</span> Quá hạn mà QLBP chưa nhập → hệ thống <b>tự động ghi nhận "5-Rất hài lòng"</b>; quá hạn <b>không cho nhập</b>. <span class="tg dx2">Đề xuất</span> Job 00:00 ngày sau hạn chốt phiếu; trạng thái <i>Tự ghi nhận</i>; Người nhập = Hệ thống; câu 1 = Đơn vị cấp 2 (như câu 1 tự điền); phiếu khóa; Nhật ký ghi rõ. Chỉ ghi câu 2, câu 3–7 để trống (Cần chốt 11); không tạo dòng ở Kết quả khảo sát.</li>
@@ -633,7 +638,7 @@ body{-webkit-font-smoothing:antialiased}
       <li><b>Câu 1 tự điền</b>: điền đúng mã Đơn vị cấp 2 trên Báo cáo dự thảo (VD "PDNI") hay tên đầy đủ của đơn vị? QLBP được sửa (đang cho sửa) hay khóa không cho sửa?</li>
       <li><b>Nhập khảo sát – Admin và QLĐV cấp 2 (auditee)</b>: chỉ xem (đang) hay được nhập phiếu? Nếu được nhập thì ngược BR06 (không đánh giá hộ).</li>
       <li><b>Quản lý đơn vị của Auditee</b> = QLĐV cấp 2 (đang – cùng người nhận CC mail) hay quản lý Đơn vị cấp 1 (xem mọi Đơn vị cấp 2 trực thuộc)? Dữ liệu mẫu: mỗi bộ phận là 1 Đơn vị cấp 2 nên QLBP và QLĐV cấp 2 (auditee) thấy cùng các dòng.</li>
-      <li><b>Tiêu đề mail</b>: sau tiền tố FTQ-&lt;Đơn vị cấp 2&gt;, tiêu đề vẫn còn "– &lt;Đơn vị cấp 2&gt; –" ở giữa (giữ như cũ) – bỏ cho gọn không? Tiền tố viết liền "FTQ-DNI" (đang) hay để trong ngoặc "[FTQ-DNI]"?</li>
+      <li><b>Tiêu đề mail</b> – <b>đã chốt 21/10</b>: tiền tố viết liền "FTQ-&lt;Đơn vị cấp 1&gt;" như ví dụ FTQ-DNB; Đơn vị cấp 2 giữ ở giữa tiêu đề (không còn lặp).</li>
     </ol>
 
     <h4>Dữ liệu mẫu</h4>
@@ -665,6 +670,7 @@ body{-webkit-font-smoothing:antialiased}
       <li>v9.3: đối chiếu xong số câu và nhánh với phiếu thật (khớp); Cần chốt 14 chuyển thành đã chốt.</li>
       <li>v10: phân quyền xem theo yêu cầu 21/10 – tách QLĐV Auditor / QLBP Auditor; Nhập khảo sát cho QLBP, QLĐV cấp 2 (auditee) và Admin; QLĐV cấp 2 không còn ở Khảo sát cuộc đánh giá / Kết quả khảo sát.</li>
       <li>v10.1: tiêu đề mail đổi tiền tố [FTEL CMS] → FTQ-&lt;Đơn vị cấp 2&gt;.</li>
+      <li>v10.2: tiền tố tiêu đề mail sửa thành FTQ-&lt;Đơn vị cấp 1&gt;; Cần chốt 19 đã chốt.</li>
     </ul>
   </div>
 </aside>
@@ -975,8 +981,8 @@ body{-webkit-font-smoothing:antialiased}
   const mailsOf = id => S.mails.filter(m => m.sid === id).sort((a, b) => (a.at - b.at) || a.id.localeCompare(b.id));
   const resOf = s => S.results.filter(x => x.sid === s.id).sort((p, q) => p.id - q.id);     // các lần gửi phiếu của dòng khảo sát
 
-  // Tiền tố tiêu đề mail: "FTQ-<Đơn vị cấp 2>", VD FTQ-DNI (yêu cầu 21/10); không có cấp 2 → cấp 1 (Đề xuất)
-  const mailPrefix = s => 'FTQ-' + (s.cap2 || s.cap1);
+  // Tiền tố tiêu đề mail: "FTQ-<Đơn vị cấp 1>", VD FTQ-DNB / FTQ-FTELBUTDDT (yêu cầu 21/10); không có cấp 1 → cấp 2 (Đề xuất)
+  const mailPrefix = s => 'FTQ-' + (s.cap1 || s.cap2);
   // type: TB = mail khảo sát · AUTO = nhắc tự động (ngày thứ 2/3/4)
   function sendMail(s, type, at) {
     let label, tag = '';
@@ -1179,7 +1185,7 @@ body{-webkit-font-smoothing:antialiased}
     const grp = (label, role, list, short) => '<optgroup label="' + label + '">' + list.map(e => opt(role, e, short)).join('') + '</optgroup>';
     const el = $('#proto');
     el.innerHTML =
-      '<div class="pt-h" data-act="ptog">' + IC.flask + 'PROTOTYPE v10.1<span class="mm">' + (UI.ptMin ? '▴' : '▾') + '</span></div>' +
+      '<div class="pt-h" data-act="ptog">' + IC.flask + 'PROTOTYPE v10.2<span class="mm">' + (UI.ptMin ? '▴' : '▾') + '</span></div>' +
       '<div class="pt-b">' +
         '<div class="pt-clk">Giờ giả lập: <b>' + fDT(S.now) + '</b></div>' +
         '<div class="pt-l">Vai trò đăng nhập</div>' +
