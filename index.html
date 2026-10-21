@@ -1,6 +1,10 @@
 <!doctype html>
 <!--
-  FTEL CMS · Khảo sát cuộc đánh giá · Prototype v9.3 (21/10/2026)
+  FTEL CMS · Khảo sát cuộc đánh giá · Prototype v10.1 (21/10/2026)
+  - v10.1: tiêu đề mail khảo sát / mail nhắc bắt đầu bằng "FTQ-<Đơn vị cấp 2>" thay cho "[FTEL CMS]" (sendMail) – yêu cầu 21/10
+  - v10: phân quyền xem theo yêu cầu 21/10 – Khảo sát cuộc đánh giá + Kết quả khảo sát: Admin · QLĐV Auditor (Auditor thuộc
+         đơn vị mình) · QLBP Auditor (Auditor thuộc bộ phận mình) · Auditor (đơn vị mình kiểm soát); Nhập khảo sát: Admin ·
+         QLBP (auditee, bộ phận mình – người nhập) · QLĐV cấp 2 (auditee, đơn vị mình – chỉ xem). PERM, scope(), ROLE_TXT
   - v9.3: đã đối chiếu 2 bộ câu theo nhánh câu 2 (2/1 và 5/4/3) từ phiếu thật – khớp PATH_LO / PATH_HI, không đổi logic phiếu
   - v9.2: Kết quả khảo sát – ô Đơn vị được kiểm soát chỉ tìm theo Đơn vị cấp 2 (yêu cầu 21/10)
   - v9.1: Kết quả khảo sát có khung Thông tin tìm kiếm (S.f.kq, filterResults(); Xuất Excel theo điều kiện đã tìm);
@@ -19,8 +23,9 @@
   - v6: module riêng KHẢO SÁT, ngay sau BÁO CÁO, gồm 2 màn: Khảo sát cuộc đánh giá · Nhập khảo sát (menu theo quyền: PERM, can())
   - v5.3: đổi tên cột QLBP (Auditee) · QLĐV cấp 2 (Auditee) · Auditor (lưới, phiếu, file Excel)
   - v5.2: Xuất Excel (.xlsx tạo ngay trong trình duyệt, không cần thư viện ngoài) – exportExcel()
-  - Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 (auditee): KHẢO SÁT › Khảo sát cuộc đánh giá (chỉ xem, theo phạm vi)
-  - QLBP (auditee): KHẢO SÁT › Nhập khảo sát — nhập trước hạn. Không có quyền → ẩn menu; mở link trực tiếp → 403
+  - Admin / QLĐV Auditor / QLBP Auditor / Auditor: KHẢO SÁT › Khảo sát cuộc đánh giá + Kết quả khảo sát (chỉ xem, theo phạm vi)
+  - QLBP (auditee): KHẢO SÁT › Nhập khảo sát — nhập trước hạn; QLĐV cấp 2 (auditee) và Admin: Nhập khảo sát chỉ xem
+  - Không có quyền → ẩn menu; mở link trực tiếp → 403
   - Không cho đánh giá hộ. Quá 5 ngày chưa nhập → hệ thống tự ghi nhận "5-Rất hài lòng", khóa phiếu
   - Mail khảo sát + nhắc: To QLBP (auditee), CC QLĐV cấp 2 (auditee) + Auditor; có cảnh báo tự ghi nhận
   - Nhắc từ ngày thứ 2 đến ngày thứ 4 sau ngày gửi; đơn vị đã khảo sát thì ngừng nhắc
@@ -32,7 +37,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FTEL CMS · Khảo sát cuộc đánh giá · Prototype v9.3</title>
+<title>FTEL CMS · Khảo sát cuộc đánh giá · Prototype v10.1</title>
 <style>
 :root{
   --blue:#1890ff; --blue-h:#40a9ff; --link:#1b3fa0;
@@ -477,7 +482,17 @@ body{-webkit-font-smoothing:antialiased}
     <p><span class="tg yc">Yêu cầu</span> theo yêu cầu 19–21/10/2026 · <span class="tg dx2">Đề xuất</span> BA đề xuất, chờ chốt</p>
 
     <div class="chg">
-      <h4>Thay đổi v9.3 (21/10)</h4>
+      <h4>Thay đổi v10.1 (21/10)</h4>
+      <ul>
+        <li><b>Tiêu đề mail</b>: "[FTEL CMS]" đổi thành <b>FTQ-&lt;Đơn vị cấp 2&gt;</b> (VD <b>FTQ-DNI</b>) cho mail khảo sát và mail nhắc <span class="tg yc">Yêu cầu</span>. Áp dụng ở mẫu mail (Xem mail) và mọi chỗ hiện tiêu đề trên CMS (Hộp thư giả lập, mail mở từ Nhật ký). VD: <i>FTQ-DNI [Nhắc lần 1/3] Khảo sát chất lượng cuộc đánh giá – Định kỳ PQC MN 2026-047-DNI-T10 – DNI – Hạn 19/10/2026</i>.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v10 (21/10)</h4>
+      <ul>
+        <li><b>Phân quyền xem theo yêu cầu 21/10</b> <span class="tg yc">Yêu cầu</span>: <b>Khảo sát cuộc đánh giá</b> và <b>Kết quả khảo sát</b> – Admin (tất cả), QLĐV Auditor (Auditor thuộc đơn vị mình), QLBP Auditor (Auditor thuộc bộ phận mình), Auditor (đơn vị mình kiểm soát). <b>Nhập khảo sát</b> – Admin (tất cả), QLBP auditee (bộ phận mình), QLĐV cấp 2 auditee (đơn vị mình).</li>
+        <li>"Quản lý Auditor" tách thành <b>QLĐV Auditor</b> và <b>QLBP Auditor</b>. Dữ liệu mẫu: bộ phận = Đơn vị kiểm soát của báo cáo (PQC MN → ql.pqcmn, PQC MB → ql.pqcmb), đơn vị = FTQ (ql.ftq) – cần nguồn thật (Cần chốt 4).</li>
+        <li>QLĐV cấp 2 (auditee) chuyển từ Khảo sát cuộc đánh giá + Kết quả khảo sát sang <b>Nhập khảo sát</b>; Admin có thêm Nhập khảo sát. Hai vai trò này chỉ có nút Xem, không nhập phiếu (BR06) <span class="tg dx2">Đề xuất</span>. Số phiếu cần khảo sát cạnh menu chỉ hiện với QLBP.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v9.3 (21/10)</h4>
       <ul>
         <li><b>Số câu và nhánh – đã chốt</b>: anh Hieu gửi 2 bộ câu từ phiếu thật. Câu 2 chọn 2/1 → 1 Tên bộ phận · 2 Mức độ hài lòng chung · 3 Góp ý · 4 Thời gian · 5 Tiêu chí · 6 Báo cáo · 7 Thái độ; câu 2 chọn 5/4/3 → 1 Tên bộ phận · 2 Mức độ hài lòng chung · 3 Thời gian · 4 Tiêu chí · 5 Báo cáo · 6 Thái độ · 7 Góp ý. Prototype khớp cả 2 bộ (đã so từng chữ, thứ tự, lựa chọn, kiểu câu); không đổi logic phiếu.</li>
       </ul>
@@ -516,15 +531,15 @@ body{-webkit-font-smoothing:antialiased}
 
     <h4>Ghi chú màn hình</h4>
     <ul class="notes">
-      <li><b>Module KHẢO SÁT</b> (ngay sau BÁO CÁO): Khảo sát cuộc đánh giá (theo dõi, theo phạm vi) · Nhập khảo sát (chỉ QLBP auditee; phiếu giống phiếu thật, 7 câu) · Kết quả khảo sát (bảng như file Excel kết quả). Không ai được đánh giá hộ. Quá hạn 5 ngày chưa nhập → hệ thống tự ghi nhận "5-Rất hài lòng", khóa phiếu; mail khảo sát có cảnh báo.</li>
-      <li><b>Khảo sát cuộc đánh giá</b>: chỉ xem. Admin xem tất cả; Quản lý Auditor xem đơn vị do các Auditor mình quản lý phụ trách; Auditor xem đơn vị mình kiểm soát; QLĐV cấp 2 (auditee) xem đơn vị mình, không Xuất Excel, không xem báo cáo <span class="tg dx2">Đề xuất</span>.</li>
-      <li><b>Nhập khảo sát</b> (QLBP auditee): chỉ phiếu của đơn vị mình, không xem được báo cáo. <b>Khảo sát</b> mở phiếu giống phiếu thật (7 câu, phân nhánh theo câu 2); còn hạn thì <b>Gửi thêm</b> được vì phiếu thật không giới hạn số lần gửi <span class="tg dx2">Đề xuất</span>. Quá hạn chưa nhập → hệ thống tự ghi nhận, không nhập được nữa.</li>
+      <li><b>Module KHẢO SÁT</b> (ngay sau BÁO CÁO): Khảo sát cuộc đánh giá (theo dõi, theo phạm vi) · Nhập khảo sát (QLBP auditee nhập; QLĐV cấp 2 auditee và Admin chỉ xem; phiếu giống phiếu thật, 7 câu) · Kết quả khảo sát (bảng như file Excel kết quả). Không ai được đánh giá hộ. Quá hạn 5 ngày chưa nhập → hệ thống tự ghi nhận "5-Rất hài lòng", khóa phiếu; mail khảo sát có cảnh báo.</li>
+      <li><b>Khảo sát cuộc đánh giá</b>: chỉ xem. Admin xem tất cả; QLĐV Auditor xem thông tin liên quan đến Auditor thuộc đơn vị mình; QLBP Auditor xem thông tin liên quan đến Auditor thuộc bộ phận mình; Auditor xem đơn vị mình kiểm soát <span class="tg yc">Yêu cầu</span>. Auditee (QLBP, QLĐV cấp 2) không vào màn này.</li>
+      <li><b>Nhập khảo sát</b>: QLBP (auditee) xem phiếu bộ phận mình, QLĐV cấp 2 (auditee) xem phiếu đơn vị mình, Admin xem tất cả <span class="tg yc">Yêu cầu</span>; chỉ QLBP nhập, Admin và QLĐV cấp 2 chỉ có nút Xem (BR06) <span class="tg dx2">Đề xuất</span>. Auditee không xem được báo cáo. <b>Khảo sát</b> mở phiếu giống phiếu thật (7 câu, phân nhánh theo câu 2); còn hạn thì <b>Gửi thêm</b> được vì phiếu thật không giới hạn số lần gửi <span class="tg dx2">Đề xuất</span>. Quá hạn chưa nhập → hệ thống tự ghi nhận, không nhập được nữa.</li>
       <li><b>Phiếu khảo sát</b>: giống phiếu thật, không thêm thông tin CMS (không hiện tên cuộc đánh giá, không có hạn trong phiếu); riêng câu 1 tự điền Đơn vị cấp 2 của dòng báo cáo dự thảo (yêu cầu 21/10), QLBP sửa được <span class="tg dx2">Đề xuất</span>. Thời gian bắt đầu = lúc mở phiếu; khi gửi, giờ giả lập cộng thêm thời gian điền thật. Nút × chỉ để đóng phiếu trên prototype. Gửi xong: thêm 1 dòng ở Kết quả khảo sát; lần gửi đầu → dòng theo dõi chuyển Đã khảo sát, ngừng nhắc.</li>
       <li><b>Xem phiếu tự ghi nhận</b>: câu 1 = Đơn vị cấp 2 (như câu 1 tự điền); câu 3–7 không có dữ liệu (Cần chốt 11); không có dòng ở Kết quả khảo sát.</li>
-      <li><b>Kết quả khảo sát</b>: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột cố định theo mã C1–C7 (câu Góp ý luôn ở cột cuối, kể cả khi trả lời ở vị trí số 3); ô câu chọn lưu nguyên nhãn; thời gian dd/MM/yyyy HH:mm:ss. Không có cột Email, Tên và các câu cũ đã xóa. Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; tự ghi nhận quá hạn không có dòng <span class="tg dx2">Đề xuất</span>. Phân trang 10 / 20 / 50 (mặc định 20), Id tăng dần, dòng mới ở trang cuối; khung <b>Thông tin tìm kiếm</b>: Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – yêu cầu 21/10), Auditor, Đơn vị kiểm soát – lọc theo dòng báo cáo dự thảo gắn với câu trả lời (không theo chữ ở câu 1), mặc định không giới hạn thời gian; nút <b>Xuất Excel</b> cạnh Tìm kiếm (Admin / Quản lý Auditor / Auditor) xuất đúng 10 cột, đúng kết quả đang tìm kiếm, toàn bộ các trang <span class="tg dx2">Đề xuất</span>.</li>
+      <li><b>Kết quả khảo sát</b>: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột cố định theo mã C1–C7 (câu Góp ý luôn ở cột cuối, kể cả khi trả lời ở vị trí số 3); ô câu chọn lưu nguyên nhãn; thời gian dd/MM/yyyy HH:mm:ss. Không có cột Email, Tên và các câu cũ đã xóa. Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; tự ghi nhận quá hạn không có dòng <span class="tg dx2">Đề xuất</span>. Phân trang 10 / 20 / 50 (mặc định 20), Id tăng dần, dòng mới ở trang cuối; khung <b>Thông tin tìm kiếm</b>: Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – yêu cầu 21/10), Auditor, Đơn vị kiểm soát – lọc theo dòng báo cáo dự thảo gắn với câu trả lời (không theo chữ ở câu 1), mặc định không giới hạn thời gian; nút <b>Xuất Excel</b> cạnh Tìm kiếm (Admin / QLĐV Auditor / QLBP Auditor / Auditor) xuất đúng 10 cột, đúng kết quả đang tìm kiếm, toàn bộ các trang <span class="tg dx2">Đề xuất</span>.</li>
       <li><b>Báo cáo dự thảo</b> (màn hiện có, giữ nguyên): mỗi dòng có Đơn vị cấp 1/cấp 2 → tự sinh 1 dòng ở Khảo sát cuộc đánh giá và gửi mail khảo sát To QLBP, CC QLĐV cấp 2 + Auditor (BR01–BR02). QLBP và QLĐV cấp 2 (auditee) không vào được màn này (BR07). Dòng trống cả 2 đơn vị → không sinh (BR10 · Đề xuất).</li>
-      <li><b>Sidebar</b>: QLBP (auditee) chỉ thấy KHẢO SÁT › Nhập khảo sát; QLĐV cấp 2 (auditee) chỉ thấy Khảo sát cuộc đánh giá và Kết quả khảo sát; cả hai không có menu BÁO CÁO (BR07). Mục mờ có nhãn "Ẩn" = vai trò hiện tại không có quyền, hệ thống thật ẩn hẳn (chỉ hiện khi bật Chú thích).</li>
-      <li><b>Mail khảo sát / mail nhắc</b>: nội dung là mẫu <span class="tg dx2">Đề xuất</span>. Trang 403: câu thông báo theo màn bị chặn, nút về màn chính của vai trò <span class="tg dx2">Đề xuất</span>.</li>
+      <li><b>Sidebar</b>: QLBP và QLĐV cấp 2 (auditee) chỉ thấy KHẢO SÁT › Nhập khảo sát, không có menu BÁO CÁO (BR07); Admin thấy cả 3 màn; QLĐV Auditor / QLBP Auditor / Auditor thấy Khảo sát cuộc đánh giá và Kết quả khảo sát. Số phiếu cần khảo sát cạnh menu chỉ hiện với QLBP. Mục mờ có nhãn "Ẩn" = vai trò hiện tại không có quyền, hệ thống thật ẩn hẳn (chỉ hiện khi bật Chú thích).</li>
+      <li><b>Mail khảo sát / mail nhắc</b>: tiêu đề <b>FTQ-&lt;Đơn vị cấp 2&gt;</b> [Nhắc lần n/3] Khảo sát chất lượng cuộc đánh giá – &lt;Tên báo cáo&gt; – &lt;Đơn vị cấp 2&gt; – Hạn dd/mm/yyyy <span class="tg yc">Yêu cầu</span> (tiền tố); phần còn lại của tiêu đề và nội dung mail là mẫu <span class="tg dx2">Đề xuất</span>. Trang 403: câu thông báo theo màn bị chặn, nút về màn chính của vai trò <span class="tg dx2">Đề xuất</span>.</li>
     </ul>
     <div class="shortcut"><b>Lối tắt kiểm thử</b> (mở bằng vai trò đang chọn, không có quyền → 403): <span class="lk" data-act="nav" data-k="baocao">Báo cáo dự thảo</span> · <span class="lk" data-act="nav" data-k="khaosat">Khảo sát cuộc đánh giá</span> · <span class="lk" data-act="nav" data-k="nhapks">Nhập khảo sát</span> · <span class="lk" data-act="nav" data-k="ketqua">Kết quả khảo sát</span> · <span class="lk" data-act="seeresult">Kết quả khảo sát bằng vai trò Admin</span></div>
 
@@ -543,13 +558,14 @@ body{-webkit-font-smoothing:antialiased}
     <h4>Phân quyền</h4>
     <table>
       <tr><th>Vai trò</th><th>Màn hình trong module KHẢO SÁT</th><th>Phạm vi xem</th><th>Thao tác</th></tr>
-      <tr><td><b>Admin</b></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Tất cả</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
-      <tr><td><b>Quản lý Auditor</b><br><span class="mu">QLBP / QLĐV phía Auditor</span></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Tất cả đơn vị do các Auditor mình quản lý phụ trách</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
+      <tr><td><b>Admin</b></td><td>Khảo sát cuộc đánh giá · Nhập khảo sát · Kết quả khảo sát</td><td>Tất cả</td><td>Xem, Nhật ký, Xuất Excel; Nhập khảo sát chỉ Xem</td></tr>
+      <tr><td><b>QLĐV Auditor</b></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Thông tin liên quan đến Auditor thuộc đơn vị mình quản lý</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
+      <tr><td><b>QLBP Auditor</b></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Thông tin liên quan đến Auditor thuộc bộ phận mình quản lý</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
       <tr><td><b>Auditor</b></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Đơn vị mình kiểm soát</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
-      <tr><td><b>QLBP</b> (auditee)</td><td>Nhập khảo sát · không có menu BÁO CÁO</td><td>Đơn vị mình</td><td>Khảo sát, Gửi thêm (còn hạn), Xem</td></tr>
-      <tr><td><b>QLĐV cấp 2</b> (auditee)</td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát · không có menu BÁO CÁO <span class="tg dx2">Đề xuất</span></td><td>Đơn vị mình</td><td>Xem, Nhật ký</td></tr>
+      <tr><td><b>QLBP</b> (auditee)</td><td>Nhập khảo sát · không có menu BÁO CÁO</td><td>Bộ phận mình</td><td>Khảo sát, Gửi thêm (còn hạn), Xem</td></tr>
+      <tr><td><b>QLĐV cấp 2</b> (auditee)</td><td>Nhập khảo sát · không có menu BÁO CÁO</td><td>Đơn vị mình</td><td>Xem <span class="tg dx2">Đề xuất</span></td></tr>
     </table>
-    <p class="mu" style="margin:6px 0 0">Màn không có quyền: ẩn menu; mở link trực tiếp → 403 <span class="tg dx2">Đề xuất</span>. Không vai trò nào được đánh giá hộ QLBP.</p>
+    <p class="mu" style="margin:6px 0 0">Màn hình và phạm vi xem theo yêu cầu 21/10; thao tác (Xuất Excel, chỉ xem) là đề xuất. Màn không có quyền: ẩn menu; mở link trực tiếp → 403 <span class="tg dx2">Đề xuất</span>. Không vai trò nào được đánh giá hộ QLBP.</p>
 
     <h4>Luồng</h4>
     <div class="flow">
@@ -577,24 +593,24 @@ body{-webkit-font-smoothing:antialiased}
     <h4>Quy tắc</h4>
     <ol class="br">
       <li><b>BR01</b> <span class="tg yc">Yêu cầu</span> Mỗi dòng báo cáo dự thảo (Tên báo cáo + Đơn vị cấp 1 + Đơn vị cấp 2) → tự sinh 1 dòng khảo sát, trạng thái <i>Chưa khảo sát</i>.</li>
-      <li><b>BR02</b> <span class="tg yc">Yêu cầu</span> Sinh dòng khảo sát → gửi mail khảo sát <b>To: QLBP (auditee)</b>, <b>CC: QLĐV cấp 2 (auditee) + Auditor</b>. Mail có <b>cảnh báo</b>: quá 5 ngày không nhập, hệ thống tự ghi nhận "5-Rất hài lòng". <span class="tg dx2">Đề xuất</span> Mail nhắc cũng có cảnh báo; link trong mail mở thẳng phiếu sau khi đăng nhập.</li>
+      <li><b>BR02</b> <span class="tg yc">Yêu cầu</span> Sinh dòng khảo sát → gửi mail khảo sát <b>To: QLBP (auditee)</b>, <b>CC: QLĐV cấp 2 (auditee) + Auditor</b>. Mail có <b>cảnh báo</b>: quá 5 ngày không nhập, hệ thống tự ghi nhận "5-Rất hài lòng". <span class="tg yc">Yêu cầu 21/10</span> Tiêu đề mail khảo sát và mail nhắc bắt đầu bằng <b>FTQ-&lt;Đơn vị cấp 2&gt;</b> (VD FTQ-DNI), thay cho [FTEL CMS]. <span class="tg dx2">Đề xuất</span> Mail nhắc cũng có cảnh báo; link trong mail mở thẳng phiếu sau khi đăng nhập; dòng không có Đơn vị cấp 2 → tiền tố lấy Đơn vị cấp 1.</li>
       <li><b>BR03</b> <span class="tg yc">Yêu cầu</span> Hạn khảo sát = ngày gửi + 5 ngày (VD gửi 05/10 → hạn 10/10). <span class="tg dx2">Đề xuất</span> Ngày gửi = ngày 0; tính ngày lịch; hết hạn lúc 23:59 ngày hạn.</li>
       <li><b>BR04</b> <span class="tg yc">Yêu cầu</span> Chưa khảo sát → nhắc <b>từ ngày thứ 2 đến ngày thứ 4</b>, To/CC như BR02; đơn vị đã khảo sát → ngừng nhắc. <span class="tg dx2">Đề xuất</span> Gửi 05/10 → nhắc 07, 08, 09/10 lúc 08:00, tối đa 3 lần.</li>
       <li><b>BR05</b> <span class="tg yc">Yêu cầu</span> Quá hạn mà QLBP chưa nhập → hệ thống <b>tự động ghi nhận "5-Rất hài lòng"</b>; quá hạn <b>không cho nhập</b>. <span class="tg dx2">Đề xuất</span> Job 00:00 ngày sau hạn chốt phiếu; trạng thái <i>Tự ghi nhận</i>; Người nhập = Hệ thống; câu 1 = Đơn vị cấp 2 (như câu 1 tự điền); phiếu khóa; Nhật ký ghi rõ. Chỉ ghi câu 2, câu 3–7 để trống (Cần chốt 11); không tạo dòng ở Kết quả khảo sát.</li>
-      <li><b>BR06</b> <span class="tg yc">Yêu cầu</span> <b>Không cho đánh giá hộ</b>: chỉ QLBP (auditee) của đơn vị được nhập phiếu.</li>
-      <li><b>BR07</b> <span class="tg yc">Yêu cầu</span> Phân quyền xem: <b>Admin</b> tất cả; <b>Quản lý Auditor</b> (QLBP / QLĐV phía Auditor) xem tất cả đơn vị do các Auditor mình quản lý phụ trách; <b>Auditor</b> chỉ đơn vị mình kiểm soát; <b>QLBP và QLĐV cấp 2 (auditee)</b> chỉ đơn vị mình. <span class="tg dx2">Đề xuất</span> QLBP và QLĐV cấp 2 chỉ thấy module KHẢO SÁT (QLBP: Nhập khảo sát; QLĐV cấp 2: Khảo sát cuộc đánh giá, chỉ xem), không xem được báo cáo (mở màn báo cáo → <i>Không có quyền truy cập</i>).</li>
+      <li><b>BR06</b> <span class="tg yc">Yêu cầu</span> <b>Không cho đánh giá hộ</b>: chỉ QLBP (auditee) của đơn vị được nhập phiếu. <span class="tg dx2">Đề xuất</span> Admin và QLĐV cấp 2 (auditee) xem được màn Nhập khảo sát nhưng không nhập (Cần chốt 17).</li>
+      <li><b>BR07</b> <span class="tg yc">Yêu cầu</span> (cập nhật 21/10) Người xem theo màn. <b>Khảo sát cuộc đánh giá</b> và <b>Kết quả khảo sát</b>: Admin xem tất cả; <b>QLĐV Auditor</b> chỉ xem thông tin liên quan đến nhân sự – Auditor thuộc đơn vị mình quản lý; <b>QLBP Auditor</b> chỉ xem thông tin liên quan đến Auditor thuộc bộ phận mình quản lý; <b>Auditor</b> chỉ xem đơn vị mình kiểm soát. <b>Nhập khảo sát</b>: Admin xem tất cả; <b>QLBP (auditee)</b> chỉ bộ phận mình; <b>QLĐV cấp 2 (auditee)</b> chỉ đơn vị mình. <span class="tg dx2">Đề xuất</span> QLBP và QLĐV cấp 2 (auditee) chỉ thấy module KHẢO SÁT › Nhập khảo sát, không xem được báo cáo (mở màn khác → <i>Không có quyền truy cập</i>). Cây tổ chức phía Auditor trong dữ liệu mẫu: Auditor → bộ phận = Đơn vị kiểm soát (PQC MN / PQC MB) → đơn vị FTQ.</li>
       <li><b>BR08</b> <span class="tg yc">Yêu cầu</span> Log hiển thị rõ ai là người nhập. <span class="tg dx2">Đề xuất</span> Cột <b>Người nhập</b>: tài khoản QLBP của lần gửi gần nhất (kèm số lần gửi), hoặc <i>Hệ thống · Tự ghi nhận</i>; lọc theo Người nhập; Nhật ký gồm sinh dòng, mail (To/CC, xem nội dung), nhắc, từng lần gửi phiếu (Id kết quả) / tự ghi nhận.</li>
       <li><b>BR09</b> <span class="tg dx2">Đề xuất</span> To: QLBP (auditee) của dòng khảo sát. CC: QLĐV của Đơn vị cấp 2 đó + Auditor của báo cáo. Dòng không có Đơn vị cấp 2 → chỉ CC Auditor.</li>
       <li><b>BR10</b> <span class="tg dx2">Đề xuất</span> Gửi lại báo cáo (Lần gửi &gt; 1): không sinh thêm dòng, không gửi lại mail. Dòng báo cáo trống cả Đơn vị cấp 1 và cấp 2 → không sinh khảo sát.</li>
       <li><b>BR11</b> <span class="tg yc">Yêu cầu</span> Phiếu nhập giống phiếu thật, không tự cải tiến: tiêu đề "[FTQ] PHIẾU KHẢO SÁT CHẤT LƯỢNG VÀ HIỆU QUẢ CUỘC ĐÁNH GIÁ", 2 đoạn mô tả, dòng "Khi bạn gửi biểu mẫu này, nó sẽ không tự động thu thập…", chú thích "* Bắt buộc", 7 câu C1–C7 (bảng trên, mỗi câu có * đỏ), dòng "Bạn có thể in một bản sao câu trả lời của mình sau khi bạn gửi" và nút <b>Gửi</b>. Logo FTQ để trống khi chưa có ảnh; không dùng logo, tên của nền tảng biểu mẫu. Không thanh tiến trình. <span class="tg yc">Yêu cầu 21/10</span> Ngoại lệ: câu 1 <b>tự điền Đơn vị cấp 2</b> của dòng báo cáo dự thảo (phiếu thật để trống). <span class="tg dx2">Đề xuất</span> Câu 1 tự điền vẫn sửa được, xóa trống → lỗi bắt buộc; dòng không có Đơn vị cấp 2 → điền Đơn vị cấp 1. Đang mở phiếu mà qua hạn → không gửi được (BR05).</li>
       <li><b>BR12</b> <span class="tg yc">Yêu cầu</span> Đầu Danh sách khảo sát chỉ hiện số đếm theo trạng thái: Đã khảo sát · Tự ghi nhận · Chưa khảo sát (theo vai trò và bộ lọc). Không hiện tổng, không tính điểm trung bình.</li>
       <li><b>BR13</b> <span class="tg dx2">Đề xuất</span> Lọc Thời gian báo cáo theo Thời gian gửi báo cáo, mặc định đầu tháng → hôm nay. Màn Nhập khảo sát (QLBP) mặc định hiện tất cả phiếu; màn Kết quả khảo sát mặc định không giới hạn Thời gian hoàn thành.</li>
-      <li><b>BR14</b> <span class="tg yc">Yêu cầu</span> Xuất Excel danh sách khảo sát. <span class="tg dx2">Đề xuất</span> Nút <b>Xuất Excel</b> cạnh Tìm kiếm, cho Admin / Quản lý Auditor / Auditor; xuất đúng danh sách đang hiển thị (phạm vi theo quyền + điều kiện đã Tìm kiếm, toàn bộ các trang); file .xlsx gồm người xuất, thời gian xuất, điều kiện lọc, số đếm theo trạng thái và 20 cột (thêm Tháng KS, Đơn vị kiểm soát, câu trả lời câu 1, điểm số); tên file Khao_sat_cuoc_danh_gia_yyyyMMdd_HHmm.xlsx.</li>
+      <li><b>BR14</b> <span class="tg yc">Yêu cầu</span> Xuất Excel danh sách khảo sát. <span class="tg dx2">Đề xuất</span> Nút <b>Xuất Excel</b> cạnh Tìm kiếm, cho Admin / QLĐV Auditor / QLBP Auditor / Auditor; xuất đúng danh sách đang hiển thị (phạm vi theo quyền + điều kiện đã Tìm kiếm, toàn bộ các trang); file .xlsx gồm người xuất, thời gian xuất, điều kiện lọc, số đếm theo trạng thái và 20 cột (thêm Tháng KS, Đơn vị kiểm soát, câu trả lời câu 1, điểm số); tên file Khao_sat_cuoc_danh_gia_yyyyMMdd_HHmm.xlsx.</li>
       <li><b>BR15</b> <span class="tg yc">Yêu cầu</span> Module <b>KHẢO SÁT</b> riêng, đặt ngay sau module BÁO CÁO, gồm 2 màn: <b>Khảo sát cuộc đánh giá</b> và <b>Nhập khảo sát</b> (v7 thêm <b>Kết quả khảo sát</b> – BR19). <span class="tg dx2">Đề xuất</span> Menu hiện theo quyền (bảng Phân quyền); không có quyền → ẩn menu, mở link trực tiếp → 403; vào màn nào thì tự mở nhóm menu chứa màn đó.</li>
       <li><b>BR16</b> <span class="tg yc">Yêu cầu</span> Thứ tự câu theo đáp án C2: 5/4/3 → C1, C2, C3, C4, C5, C6, C7; 2/1 → C1, C2, <b>C7</b>, C3, C4, C5, C6. Cả 2 nhánh đủ 7 câu, đều bắt buộc. Số thứ tự đánh theo vị trí hiển thị, không theo mã (nhánh 2/1: C7 là "3.", C3 là "4.", C6 là "7."). Đã đối chiếu 21/10 với 2 bộ câu theo nhánh từ phiếu thật: khớp.</li>
       <li><b>BR17</b> <span class="tg yc">Yêu cầu</span> Hiện dần: mở phiếu chỉ thấy câu 1 và 2. C2, C3, C4, C5 có cấu hình nhánh → câu kế trên đường đi chỉ hiện khi câu này đã chọn; câu khác không chặn, câu kế hiện cùng lúc (nhánh 2/1: chọn C2 → C7 và C3 hiện cùng lúc; nhánh 5/4/3: chọn C5 → C6 và C7 hiện cùng lúc). Đổi C2 giữa chừng → tính lại thứ tự, đánh số lại ngay, giữ các câu đã trả lời (câu nằm sau một câu nhánh chưa chọn thì tạm ẩn, vẫn giữ câu trả lời).</li>
       <li><b>BR18</b> <span class="tg yc">Yêu cầu</span> Gửi: còn câu bắt buộc chưa trả lời → chặn, báo lỗi ngay dưới câu đó. Ô chữ 1 dòng, không giới hạn độ dài, không kiểm tra nội dung ("." hợp lệ). Không giới hạn số lần gửi; phiếu không yêu cầu đăng nhập, không lưu tên hay email. Sau khi gửi hiện màn cảm ơn đơn giản (phiếu thật không đặt lời cảm ơn riêng). <span class="tg dx2">Đề xuất</span> Chuỗi lỗi "Câu hỏi này là bắt buộc."; lời cảm ơn "Cảm ơn bạn! Câu trả lời của bạn đã được gửi."; trong CMS, QLBP mở phiếu từ dòng khảo sát (đã đăng nhập) – xem Cần chốt 9.</li>
-      <li><b>BR19</b> <span class="tg yc">Yêu cầu</span> Kết quả khảo sát: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột theo thứ tự: Id (tăng từ 1) · Thời gian bắt đầu (lúc mở phiếu) · Thời gian hoàn thành (lúc bấm Gửi) · Tên đơn vị của Anh/Chị (C1) · C2 · C3 · C4 · C5 · C6 · C7 (tiêu đề cột = nội dung câu). Thứ tự cột cố định theo mã, C7 luôn ở cột cuối. Ô câu chọn lưu nguyên nhãn đáp án. Thời gian dd/MM/yyyy HH:mm:ss, giờ Việt Nam (giả định). Bỏ cột Email, Tên và các câu cũ đã xóa khỏi phiếu. <span class="tg dx2">Đề xuất</span> Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; hệ thống tự ghi nhận quá hạn không phải lần gửi → không có dòng. Phân trang như lưới CMS (10 / 20 / 50, mặc định 20). Nút <b>Xuất Excel</b> cho Admin / Quản lý Auditor / Auditor: file .xlsx đúng 10 cột như bảng (không thêm dòng tiêu đề), toàn bộ câu trả lời trong phạm vi xem, Id dạng số, thời gian là giá trị ngày giờ Excel định dạng dd/mm/yyyy hh:mm:ss; tên file Ket_qua_khao_sat_yyyyMMdd_HHmm.xlsx. Khung Thông tin tìm kiếm (v9.1): Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – <span class="tg yc">Yêu cầu</span> v9.2), Auditor, Đơn vị kiểm soát; Xuất Excel theo đúng điều kiện đã Tìm kiếm.</li>
+      <li><b>BR19</b> <span class="tg yc">Yêu cầu</span> Kết quả khảo sát: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột theo thứ tự: Id (tăng từ 1) · Thời gian bắt đầu (lúc mở phiếu) · Thời gian hoàn thành (lúc bấm Gửi) · Tên đơn vị của Anh/Chị (C1) · C2 · C3 · C4 · C5 · C6 · C7 (tiêu đề cột = nội dung câu). Thứ tự cột cố định theo mã, C7 luôn ở cột cuối. Ô câu chọn lưu nguyên nhãn đáp án. Thời gian dd/MM/yyyy HH:mm:ss, giờ Việt Nam (giả định). Bỏ cột Email, Tên và các câu cũ đã xóa khỏi phiếu. <span class="tg dx2">Đề xuất</span> Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; hệ thống tự ghi nhận quá hạn không phải lần gửi → không có dòng. Phân trang như lưới CMS (10 / 20 / 50, mặc định 20). Nút <b>Xuất Excel</b> cho Admin / QLĐV Auditor / QLBP Auditor / Auditor: file .xlsx đúng 10 cột như bảng (không thêm dòng tiêu đề), toàn bộ câu trả lời trong phạm vi xem, Id dạng số, thời gian là giá trị ngày giờ Excel định dạng dd/mm/yyyy hh:mm:ss; tên file Ket_qua_khao_sat_yyyyMMdd_HHmm.xlsx. Khung Thông tin tìm kiếm (v9.1): Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – <span class="tg yc">Yêu cầu</span> v9.2), Auditor, Đơn vị kiểm soát; Xuất Excel theo đúng điều kiện đã Tìm kiếm.</li>
     </ol>
 
     <h4>Cần chốt</h4>
@@ -602,26 +618,29 @@ body{-webkit-font-smoothing:antialiased}
       <li><b>Cách đếm ngày</b>: ngày gửi là ngày 0 hay ngày thứ 1? Đang tính ngày 0 → gửi 05/10: nhắc 07, 08, 09/10, hạn 10/10, tự ghi nhận 00:00 11/10. Nếu ngày gửi là ngày thứ 1 → nhắc 06, 07, 08/10, hạn 09/10.</li>
       <li>Tính ngày lịch hay ngày làm việc; T7/CN có gửi nhắc không?</li>
       <li>Khi hệ thống tự ghi nhận, có gửi mail báo cho QLBP / QLĐV cấp 2 / Auditor không?</li>
-      <li>Nguồn dữ liệu: QLBP và QLĐV cấp 2 (auditee) của từng đơn vị; Auditor ↔ đơn vị kiểm soát; Quản lý Auditor ↔ Auditor (cây tổ chức / phân quyền nào)?</li>
-      <li>"Admin" là nhóm quyền nào (FTQ)? QLĐV cấp 2 xem tại Khảo sát cuộc đánh giá (đang đề xuất) hay chỉ nhận mail CC? QLBP có cần thêm màn Khảo sát cuộc đánh giá không?</li>
+      <li>Nguồn dữ liệu: QLBP và QLĐV cấp 2 (auditee) của từng đơn vị; Auditor ↔ đơn vị kiểm soát; <b>cây tổ chức phía Auditor</b> (Auditor → bộ phận → đơn vị) để lọc cho QLBP Auditor / QLĐV Auditor lấy ở đâu? Dữ liệu mẫu đang giả định bộ phận = Đơn vị kiểm soát (PQC MN / PQC MB), đơn vị = FTQ.</li>
+      <li>"Admin" là nhóm quyền nào (FTQ)? (Phần auditee xem màn nào đã chốt theo phân quyền 21/10.)</li>
       <li>QLBP chi nhánh đã có tài khoản FTEL CMS chưa, hay cần nhập trên MobiQC?</li>
       <li>Báo cáo loại khác "Định kỳ" có sinh khảo sát không?</li>
-      <li>Xuất Excel: QLBP / QLĐV cấp 2 có cần xuất không? Có cần thêm sheet Nhật ký (mail, người nhập) không?</li>
+      <li>Xuất Excel: màn Nhập khảo sát (QLBP, QLĐV cấp 2, Admin) có cần nút Xuất Excel không? Có cần thêm sheet Nhật ký (mail, người nhập) không?</li>
       <li><b>Phiếu thật</b> không yêu cầu đăng nhập, không lưu tên/email, gửi không giới hạn – ngược với BR06 (không đánh giá hộ, cần biết ai gửi) và BR08 (log người nhập). Prototype đang: QLBP đăng nhập CMS, mở phiếu từ dòng khảo sát; bảng Kết quả không có Tên/Email; màn theo dõi và Nhật ký vẫn ghi tài khoản. Giữ cách này hay mở phiếu không cần đăng nhập?</li>
       <li>Gửi nhiều lần: kết quả của đơn vị (Mức độ hài lòng, Người nhập ở màn theo dõi, file Excel theo dõi) lấy lần gửi <b>gần nhất</b> (đang làm) hay lần đầu?</li>
       <li>Tự ghi nhận quá hạn: câu 3–7 điền gì (đang để trống)? Có ghi thêm 1 dòng vào Kết quả khảo sát không (đang không)?</li>
-      <li>Kết quả khảo sát: phạm vi xem theo quyền như trên đã đúng chưa? Phiếu không hiện tên cuộc đánh giá (giống thật), CMS gắn câu trả lời vào dòng khảo sát qua nút/link mở phiếu – OK? Nút Xuất Excel 10 cột đã thêm theo góp ý "Xuất": QLĐV cấp 2 có cần xuất không? Phân trang đang mở trang 1 (Id nhỏ nhất), dòng mới ở trang cuối – giữ hay đảo Id giảm dần (mới nhất lên đầu)?</li>
+      <li>Kết quả khảo sát: phạm vi xem theo quyền như trên đã đúng chưa? Phiếu không hiện tên cuộc đánh giá (giống thật), CMS gắn câu trả lời vào dòng khảo sát qua nút/link mở phiếu – OK? Nút Xuất Excel 10 cột đã thêm theo góp ý "Xuất". Phân trang đang mở trang 1 (Id nhỏ nhất), dòng mới ở trang cuối – giữ hay đảo Id giảm dần (mới nhất lên đầu)?</li>
       <li>Chip lọc nhanh trên đầu danh sách và thanh nhắc việc cho QLBP (v8) có giữ không?</li>
       <li><b>Số câu và nhánh</b> – <b>đã chốt 21/10</b>: anh Hieu gửi 2 bộ câu từ phiếu thật, khớp prototype – C2 = 5/4/3 → C1, C2, C3, C4, C5, C6, C7 (câu 7 là Góp ý, ô chữ); C2 = 2/1 → C1, C2, C7, C3, C4, C5, C6 (câu 7 là Thái độ, chọn đáp án).</li>
       <li><b>Bộ lọc Kết quả khảo sát</b>: Tên báo cáo · Thời gian hoàn thành · Mức độ hài lòng (câu 2) · Đơn vị được kiểm soát (cấp 2) · Auditor · Đơn vị kiểm soát đã đủ chưa? Màn Khảo sát cuộc đánh giá có đổi ô Đơn vị được kiểm soát thành chỉ cấp 2 không (đang cấp 1 + cấp 2)? Có cần lọc theo câu 3–6 hoặc nội dung góp ý (câu 7) không? Thời gian mặc định để trống (tất cả) hay đầu tháng → hôm nay như màn theo dõi?</li>
       <li><b>Câu 1 tự điền</b>: điền đúng mã Đơn vị cấp 2 trên Báo cáo dự thảo (VD "PDNI") hay tên đầy đủ của đơn vị? QLBP được sửa (đang cho sửa) hay khóa không cho sửa?</li>
+      <li><b>Nhập khảo sát – Admin và QLĐV cấp 2 (auditee)</b>: chỉ xem (đang) hay được nhập phiếu? Nếu được nhập thì ngược BR06 (không đánh giá hộ).</li>
+      <li><b>Quản lý đơn vị của Auditee</b> = QLĐV cấp 2 (đang – cùng người nhận CC mail) hay quản lý Đơn vị cấp 1 (xem mọi Đơn vị cấp 2 trực thuộc)? Dữ liệu mẫu: mỗi bộ phận là 1 Đơn vị cấp 2 nên QLBP và QLĐV cấp 2 (auditee) thấy cùng các dòng.</li>
+      <li><b>Tiêu đề mail</b>: sau tiền tố FTQ-&lt;Đơn vị cấp 2&gt;, tiêu đề vẫn còn "– &lt;Đơn vị cấp 2&gt; –" ở giữa (giữ như cũ) – bỏ cho gọn không? Tiền tố viết liền "FTQ-DNI" (đang) hay để trong ngoặc "[FTQ-DNI]"?</li>
     </ol>
 
     <h4>Dữ liệu mẫu</h4>
     <ul>
       <li>Báo cáo T09: 12/17 dòng lấy từ ảnh màn Báo cáo dự thảo (5 dòng bị che, không tự thêm).</li>
       <li>Giả lập để có nhiều bản ghi (cùng các đơn vị trong ảnh, không gắn nhãn trên lưới): báo cáo T05–T08 gửi 05/06, 06/07, 05/08, 07/09 (đã hết hạn; khoảng 1/5 phiếu không nhập → tự ghi nhận; 2 dòng gửi 2 lần) và báo cáo T10 gửi 14–19/10 (số 047 → 051, đang trong hạn). Số lỗi / nhân sự / XLVP của báo cáo giả lập tính theo tỉ lệ từ T09. Nhãn "giả lập" chỉ gắn cho báo cáo sinh bằng nút ① trên bảng Prototype.</li>
-      <li>Email QLBP (qlbp.&lt;mã đơn vị&gt;@fpt.com), QLĐV cấp 2 (qldv.&lt;mã đơn vị&gt;@fpt.com), Auditor (auditor.&lt;mã site&gt;@fpt.com), Quản lý Auditor (ql.&lt;đơn vị kiểm soát&gt;@fpt.com, gán theo Đơn vị kiểm soát của báo cáo), kết quả khảo sát, lịch sử mail: giả lập.</li>
+      <li>Email QLBP (qlbp.&lt;mã đơn vị&gt;@fpt.com), QLĐV cấp 2 (qldv.&lt;mã đơn vị&gt;@fpt.com), Auditor (auditor.&lt;mã site&gt;@fpt.com), QLBP Auditor (ql.&lt;bộ phận&gt;@fpt.com – bộ phận = Đơn vị kiểm soát của báo cáo: ql.pqcmn, ql.pqcmb), QLĐV Auditor (ql.ftq@fpt.com – đơn vị FTQ), kết quả khảo sát, lịch sử mail: giả lập.</li>
       <li>46 câu trả lời mẫu ở Kết quả khảo sát, theo các phiếu QLBP đã nhập: câu 1 = Đơn vị cấp 2 (giá trị tự điền); câu 2–7, góp ý, thời gian bắt đầu / hoàn thành là giả lập (5 phiếu T09 và phiếu PBLU T10 giữ như bản trước).</li>
       <li>Giờ hệ thống giả lập bắt đầu 09:30 19/10/2026. Khi gửi phiếu, giờ giả lập cộng thêm thời gian điền thật (để có Thời gian bắt đầu / hoàn thành đến giây).</li>
     </ul>
@@ -644,6 +663,8 @@ body{-webkit-font-smoothing:antialiased}
       <li>v9.1: Kết quả khảo sát có khung Thông tin tìm kiếm (Xuất Excel theo điều kiện đã tìm); câu 1 tự điền Đơn vị cấp 2 của dòng báo cáo dự thảo.</li>
       <li>v9.2: Kết quả khảo sát – Đơn vị được kiểm soát chỉ tìm theo Đơn vị cấp 2.</li>
       <li>v9.3: đối chiếu xong số câu và nhánh với phiếu thật (khớp); Cần chốt 14 chuyển thành đã chốt.</li>
+      <li>v10: phân quyền xem theo yêu cầu 21/10 – tách QLĐV Auditor / QLBP Auditor; Nhập khảo sát cho QLBP, QLĐV cấp 2 (auditee) và Admin; QLĐV cấp 2 không còn ở Khảo sát cuộc đánh giá / Kết quả khảo sát.</li>
+      <li>v10.1: tiêu đề mail đổi tiền tố [FTEL CMS] → FTQ-&lt;Đơn vị cấp 2&gt;.</li>
     </ul>
   </div>
 </aside>
@@ -661,7 +682,7 @@ body{-webkit-font-smoothing:antialiased}
   const DAY = 86400000;
   const ADMIN_USER = 'QuynhVTN9@fpt.com';
   const SCORE = { 5: 'Rất hài lòng', 4: 'Hài lòng', 3: 'Bình thường', 2: 'Không hài lòng', 1: 'Rất không hài lòng' };
-  const ROLE_TXT = { ADMIN: 'Admin', QLAUD: 'Quản lý Auditor', AUDITOR: 'Auditor', QLBP: 'QLBP (auditee)', QLDV: 'QLĐV cấp 2 (auditee)' };
+  const ROLE_TXT = { ADMIN: 'Admin', QLDVA: 'QLĐV Auditor', QLBPA: 'QLBP Auditor', AUDITOR: 'Auditor', QLBP: 'QLBP (auditee)', QLDV: 'QLĐV cấp 2 (auditee)' };
 
   /* ===== Tiện ích ===== */
   const pad = n => String(n).padStart(2, '0');
@@ -682,7 +703,10 @@ body{-webkit-font-smoothing:antialiased}
   const accHTML = e => '<span title="' + esc(e) + '">' + esc(acc(e)) + '</span>';
   const qlbpOf = code => 'qlbp.' + String(code).toLowerCase() + '@fpt.com';                        // dữ liệu mẫu
   const qldvOf = code => code ? 'qldv.' + String(code).toLowerCase() + '@fpt.com' : '';           // dữ liệu mẫu (QLĐV cấp 2)
-  const qlAudOf = dvks => 'ql.' + String(dvks).toLowerCase().replace(/\s+/g, '') + '@fpt.com';      // dữ liệu mẫu (Quản lý Auditor theo Đơn vị kiểm soát)
+  // Cây tổ chức phía Auditor (dữ liệu mẫu – Cần chốt 4): Auditor → bộ phận = Đơn vị kiểm soát của báo cáo (PQC MN / PQC MB) → đơn vị FTQ
+  const AUD_DV = 'FTQ';
+  const qlbpAudOf = bp => 'ql.' + String(bp).toLowerCase().replace(/\s+/g, '') + '@fpt.com';       // QLBP Auditor của bộ phận
+  const qldvAudOf = dv => 'ql.' + String(dv).toLowerCase().replace(/\s+/g, '') + '@fpt.com';       // QLĐV Auditor của đơn vị
   const siteOf = ten => { const m = /-([A-Z0-9]+)-T\d+$/.exec(ten || ''); return m ? m[1] : 'x'; };
   const auditorOf = ten => 'auditor.' + siteOf(ten).toLowerCase() + '@fpt.com';                   // dữ liệu mẫu
   const defaultQ1 = s => s.cap2 || s.cap1;     // câu 1 tự điền = Đơn vị cấp 2 của dòng báo cáo dự thảo (yêu cầu 21/10); không có cấp 2 → cấp 1 (Đề xuất)
@@ -877,7 +901,8 @@ body{-webkit-font-smoothing:antialiased}
 
   /* ===== Nghiệp vụ ===== */
   function createReport(o) {
-    const r = Object.assign({ id: 'BC' + pad3(++S.rSeq), loai: 'Định kỳ', lanGui: 1, order: S.rSeq, auditor: auditorOf(o.ten), qlAud: qlAudOf(o.dvks) }, o);
+    const r = Object.assign({ id: 'BC' + pad3(++S.rSeq), loai: 'Định kỳ', lanGui: 1, order: S.rSeq, auditor: auditorOf(o.ten),
+      bpAud: o.dvks, dvAud: AUD_DV, qlbpAud: qlbpAudOf(o.dvks), qldvAud: qldvAudOf(AUD_DV) }, o);
     S.reports.push(r);
     return { report: r, result: onDraftReportCreated(r) };
   }
@@ -936,7 +961,8 @@ body{-webkit-font-smoothing:antialiased}
     const s = {
       id: 'KS' + pad3(++S.kSeq), key, reportId: r.id, ten: r.ten, loai: r.loai, cap1: r.cap1, cap2: r.cap2,
       thang: r.thang, dvks: r.dvks, tgGui: r.tgGui, order: r.order, sim: r.sim,
-      qlbp: qlbpOf(r.cap2 || r.cap1), qldv: qldvOf(r.cap2), auditor: r.auditor, qlAud: r.qlAud,
+      qlbp: qlbpOf(r.cap2 || r.cap1), qldv: qldvOf(r.cap2), auditor: r.auditor,
+      bpAud: r.bpAud, dvAud: r.dvAud, qlbpAud: r.qlbpAud, qldvAud: r.qldvAud,
       status: 'CHUA', score: null, q1: null, by: null, byRole: null, at: null, auto: 0
     };
     S.surveys.push(s);
@@ -949,13 +975,15 @@ body{-webkit-font-smoothing:antialiased}
   const mailsOf = id => S.mails.filter(m => m.sid === id).sort((a, b) => (a.at - b.at) || a.id.localeCompare(b.id));
   const resOf = s => S.results.filter(x => x.sid === s.id).sort((p, q) => p.id - q.id);     // các lần gửi phiếu của dòng khảo sát
 
+  // Tiền tố tiêu đề mail: "FTQ-<Đơn vị cấp 2>", VD FTQ-DNI (yêu cầu 21/10); không có cấp 2 → cấp 1 (Đề xuất)
+  const mailPrefix = s => 'FTQ-' + (s.cap2 || s.cap1);
   // type: TB = mail khảo sát · AUTO = nhắc tự động (ngày thứ 2/3/4)
   function sendMail(s, type, at) {
     let label, tag = '';
     if (type === 'TB') label = 'Mail khảo sát';
     else { s.auto++; label = 'Nhắc lần ' + s.auto + '/' + MAX_AUTO; tag = '[Nhắc lần ' + s.auto + '/' + MAX_AUTO + '] '; }
     const m = { id: 'M' + pad3(++S.mSeq), sid: s.id, type, label, n: type === 'AUTO' ? s.auto : 0, to: s.qlbp, cc: ccOf(s), at: new Date(at), status: 'Đã gửi' };
-    m.subject = '[FTEL CMS] ' + tag + 'Khảo sát chất lượng cuộc đánh giá – ' + s.ten + ' – ' + (s.cap2 || s.cap1) + ' – Hạn ' + fD(dueDate(s));
+    m.subject = mailPrefix(s) + ' ' + tag + 'Khảo sát chất lượng cuộc đánh giá – ' + s.ten + ' – ' + (s.cap2 || s.cap1) + ' – Hạn ' + fD(dueDate(s));
     S.mails.push(m);
     return m;
   }
@@ -1034,9 +1062,10 @@ body{-webkit-font-smoothing:antialiased}
 
   /* ===== Quyền màn hình (BR07, BR15) – không có quyền: ẩn menu; mở link trực tiếp → 403 (Đề xuất) ===== */
   const PERM = {
-    ADMIN: ['baocao', 'khaosat', 'ketqua'], QLAUD: ['baocao', 'khaosat', 'ketqua'], AUDITOR: ['baocao', 'khaosat', 'ketqua'],
-    QLBP: ['nhapks'],                // nhập phiếu của đơn vị mình (BR06)
-    QLDV: ['khaosat', 'ketqua']      // Đề xuất: chỉ xem, chỉ đơn vị mình
+    ADMIN: ['baocao', 'khaosat', 'nhapks', 'ketqua'],     // Nhập khảo sát: chỉ xem (BR06)
+    QLDVA: ['baocao', 'khaosat', 'ketqua'], QLBPA: ['baocao', 'khaosat', 'ketqua'], AUDITOR: ['baocao', 'khaosat', 'ketqua'],
+    QLBP: ['nhapks'],                // nhập phiếu của bộ phận mình (BR06)
+    QLDV: ['nhapks']                 // xem phiếu của đơn vị mình, không nhập (Đề xuất)
   };
   const can = k => (PERM[S.role] || []).indexOf(k) >= 0;
   const home = () => can('khaosat') ? 'khaosat' : (PERM[S.role] || ['khaosat'])[0];
@@ -1047,7 +1076,8 @@ body{-webkit-font-smoothing:antialiased}
       case 'QLBP': return S.surveys.filter(s => s.qlbp === S.user);
       case 'QLDV': return S.surveys.filter(s => s.qldv === S.user);
       case 'AUDITOR': return S.surveys.filter(s => s.auditor === S.user);
-      case 'QLAUD': return S.surveys.filter(s => s.qlAud === S.user);
+      case 'QLBPA': return S.surveys.filter(s => s.qlbpAud === S.user);     // Auditor thuộc bộ phận mình quản lý
+      case 'QLDVA': return S.surveys.filter(s => s.qldvAud === S.user);     // Auditor thuộc đơn vị mình quản lý
       default: return S.surveys.slice();
     }
   }
@@ -1109,10 +1139,8 @@ body{-webkit-font-smoothing:antialiased}
   function resetOpen() { UI.open = {}; openFor(S.screen); if (isAuditee()) UI.open['KHẢO SÁT'] = true; }
   function go(k) { S.screen = k; resetOpen(); closeAll(); renderAll(); window.scrollTo(0, 0); }   // đổi màn: chỉ mở nhóm chứa màn đó
   function ghostTxt(k) {
-    if (k === 'ketqua') return 'Màn <b>Kết quả khảo sát</b> dành cho Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 (theo phạm vi). QLBP (auditee) xem câu trả lời của đơn vị mình bằng nút Xem ở Nhập khảo sát → hệ thống ẩn menu này (Đề xuất).';
-    return k === 'nhapks'
-      ? 'Màn <b>Nhập khảo sát</b> chỉ hiện với <b>QLBP (auditee)</b>, người duy nhất được nhập phiếu, không đánh giá hộ (BR06). ' + ROLE_TXT[S.role] + ' không có quyền → hệ thống ẩn menu này. Đổi vai trò trên bảng Prototype để xem.'
-      : 'Màn <b>Khảo sát cuộc đánh giá</b> dành cho Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 (theo phạm vi). QLBP (auditee) theo dõi phiếu của đơn vị mình ngay tại Nhập khảo sát → hệ thống ẩn menu này (Đề xuất).';
+    if (k === 'nhapks') return 'Màn <b>Nhập khảo sát</b> dành cho <b>QLBP (auditee)</b> – người nhập phiếu, <b>QLĐV cấp 2 (auditee)</b> và <b>Admin</b> (chỉ xem). ' + ROLE_TXT[S.role] + ' không có quyền → hệ thống ẩn menu này. Đổi vai trò trên bảng Prototype để xem.';
+    return 'Màn <b>' + SCR[k] + '</b> dành cho Admin / QLĐV Auditor / QLBP Auditor / Auditor (theo phạm vi). QLBP và QLĐV cấp 2 (auditee) theo dõi và xem câu trả lời của đơn vị mình tại Nhập khảo sát → hệ thống ẩn menu này.';
   }
 
   function renderSide() {
@@ -1127,7 +1155,7 @@ body{-webkit-font-smoothing:antialiased}
       h += '<ul class="sub">' + m.sub.map(x => {
         if (!SCR[x.k]) return '<li class="si" data-act="oos"><span class="t">' + x.t + '</span></li>';     // màn hiện có, ngoài phạm vi prototype
         if (!can(x.k)) return '<li class="si ghost" data-act="ghost" data-k="' + x.k + '" title="Vai trò hiện tại không có quyền → hệ thống ẩn menu này. Prototype chỉ hiện mờ khi bật Chú thích."><span class="t">' + x.t + '</span><span class="tag-hide">Ẩn</span></li>';
-        const pend = x.k === 'nhapks' ? scope().filter(s => s.status === 'CHUA').length : 0;
+        const pend = x.k === 'nhapks' && S.role === 'QLBP' ? scope().filter(s => s.status === 'CHUA').length : 0;   // chỉ người phải nhập
         return '<li class="si' + (S.screen === x.k ? ' active' : '') + '" data-act="nav" data-k="' + x.k + '"><span class="t">' + x.t + '</span>' +
           (pend ? '<span class="cnt" title="Phiếu cần khảo sát">' + pend + '</span>' : '') + '</li>';
       }).join('') + '</ul>';
@@ -1151,13 +1179,14 @@ body{-webkit-font-smoothing:antialiased}
     const grp = (label, role, list, short) => '<optgroup label="' + label + '">' + list.map(e => opt(role, e, short)).join('') + '</optgroup>';
     const el = $('#proto');
     el.innerHTML =
-      '<div class="pt-h" data-act="ptog">' + IC.flask + 'PROTOTYPE v9.3<span class="mm">' + (UI.ptMin ? '▴' : '▾') + '</span></div>' +
+      '<div class="pt-h" data-act="ptog">' + IC.flask + 'PROTOTYPE v10.1<span class="mm">' + (UI.ptMin ? '▴' : '▾') + '</span></div>' +
       '<div class="pt-b">' +
         '<div class="pt-clk">Giờ giả lập: <b>' + fDT(S.now) + '</b></div>' +
         '<div class="pt-l">Vai trò đăng nhập</div>' +
         '<select class="pt-sel" data-ch="role">' +
           grp('Admin', 'ADMIN', [ADMIN_USER], 'Admin') +
-          grp('Quản lý Auditor', 'QLAUD', uniq(S.surveys.map(s => s.qlAud)).sort(), 'QL Auditor') +
+          grp('QLĐV Auditor', 'QLDVA', uniq(S.surveys.map(s => s.qldvAud)).sort(), 'QLĐV Auditor') +
+          grp('QLBP Auditor', 'QLBPA', uniq(S.surveys.map(s => s.qlbpAud)).sort(), 'QLBP Auditor') +
           grp('Auditor', 'AUDITOR', uniq(S.surveys.map(s => s.auditor)).sort(), 'Auditor') +
           grp('QLBP (auditee)', 'QLBP', uniq(S.surveys.map(s => s.qlbp)).sort(), 'QLBP') +
           grp('QLĐV cấp 2 (auditee)', 'QLDV', uniq(S.surveys.map(s => s.qldv).filter(Boolean)).sort(), 'QLĐV cấp 2') +
@@ -1242,7 +1271,7 @@ body{-webkit-font-smoothing:antialiased}
 
   function view403() {
     const why = S.screen === 'baocao' ? 'không xem được báo cáo'
-      : S.screen === 'nhapks' ? 'không có quyền nhập khảo sát: chỉ QLBP (auditee) của đơn vị được nhập phiếu'
+      : S.screen === 'nhapks' ? 'không có màn Nhập khảo sát: màn này dành cho QLBP / QLĐV cấp 2 (auditee) và Admin'
       : S.screen === 'ketqua' ? 'không có màn Kết quả khảo sát: xem câu trả lời của đơn vị mình bằng nút Xem tại KHẢO SÁT › Nhập khảo sát'
       : 'không có màn Khảo sát cuộc đánh giá: theo dõi phiếu của đơn vị mình tại KHẢO SÁT › Nhập khảo sát';
     return '<section class="panel"><div class="e403 result"><div class="r-ic">' + IC.lock + '</div><div class="r-code">403</div><div class="r-t">Không có quyền truy cập</div>' +
@@ -1250,7 +1279,7 @@ body{-webkit-font-smoothing:antialiased}
       '<button class="btn pri" data-act="nav" data-k="' + home() + '">Về màn ' + SCR[home()] + '</button></div></section>';
   }
 
-  /* --- KHẢO SÁT › Nhập khảo sát: QLBP (auditee) nhập phiếu của đơn vị mình (BR06, BR07) --- */
+  /* --- KHẢO SÁT › Nhập khảo sát: QLBP (auditee) nhập phiếu bộ phận mình; QLĐV cấp 2 (auditee) xem đơn vị mình; Admin xem tất cả (BR06, BR07) --- */
   function viewAuditee() {
     const f = S.f.nk, mine = scope(), qlbp = S.role === 'QLBP';
     const units = uniq(mine.map(s => (s.cap2 || s.cap1) + (s.cap1 && s.cap2 ? ' (' + s.cap1 + ')' : ''))).join(', ');
@@ -1261,7 +1290,7 @@ body{-webkit-font-smoothing:antialiased}
           fld('Trạng thái khảo sát', selHTML('st', 'Chọn để tìm kiếm', optPairs(ST_OPTS, f.st), f.st)) + '<div class="fld"></div>' +
         '</div><div class="btn-row"><button class="btn pri" data-act="search">' + IC.search + 'Tìm kiếm</button></div>' +
       '</div></section>' +
-      '<section class="panel"><div class="panel-h">Phiếu khảo sát của đơn vị ' + esc(units || '—') + '<span class="sum" id="sum"></span></div><div id="list"></div></section>';
+      '<section class="panel"><div class="panel-h">' + (S.role === 'ADMIN' ? 'Phiếu khảo sát của tất cả đơn vị' : 'Phiếu khảo sát của đơn vị ' + esc(units || '—')) + '<span class="sum" id="sum"></span></div><div id="list"></div></section>';
   }
 
   // QLBP: thanh nhắc việc ngay đầu màn – số phiếu cần khảo sát, hạn gần nhất, nút Khảo sát ngay (Đề xuất)
@@ -1297,7 +1326,7 @@ body{-webkit-font-smoothing:antialiased}
       pagerHTML('nk', rows.length, p.page, p.size, p.pages);
   }
 
-  /* --- KHẢO SÁT › Khảo sát cuộc đánh giá (chỉ xem, theo phạm vi): Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 --- */
+  /* --- KHẢO SÁT › Khảo sát cuộc đánh giá (chỉ xem, theo phạm vi): Admin / QLĐV Auditor / QLBP Auditor / Auditor --- */
   function viewKhaoSat() {
     const f = S.f.ks, sc = scope().sort(byTime);
     const scOpts = optPairs([5, 4, 3, 2, 1].map(n => [n, scoreTxt(n)]), f.sc);
@@ -1808,7 +1837,7 @@ body{-webkit-font-smoothing:antialiased}
     get state() { return S; }, UI, onDraftReportCreated, createReport, sendMail, isDue, finalizeOverdue, runRemindJob, simulateReport,
     get form() { return F; }, QS, pathOf, visibleQs, RES_COLS,
     setRole, scope, can, PERM, go, openSurvey, submitSurvey, openLog, logOf, renderAll, toast, stOf, dueDate, exportExcel, buildXlsxBlob, exportRow,
-    exportKetQua, KQ_COLS, kqExportRow, filterResults, defaultQ1, SITES, CUR, dueEnd,
+    exportKetQua, KQ_COLS, kqExportRow, filterResults, defaultQ1, mailPrefix, SITES, CUR, dueEnd,
     DEADLINE_DAYS, REMIND_DAYS, MAX_AUTO, REMIND_HOUR, AUTO_SCORE
   };
 })();
