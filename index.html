@@ -1,10 +1,26 @@
 <!doctype html>
 <!--
-  FTEL CMS · Khảo sát cuộc đánh giá · Prototype v5.3 (19/10/2026)
+  FTEL CMS · Khảo sát cuộc đánh giá · Prototype v9.3 (21/10/2026)
+  - v9.3: đã đối chiếu 2 bộ câu theo nhánh câu 2 (2/1 và 5/4/3) từ phiếu thật – khớp PATH_LO / PATH_HI, không đổi logic phiếu
+  - v9.2: Kết quả khảo sát – ô Đơn vị được kiểm soát chỉ tìm theo Đơn vị cấp 2 (yêu cầu 21/10)
+  - v9.1: Kết quả khảo sát có khung Thông tin tìm kiếm (S.f.kq, filterResults(); Xuất Excel theo điều kiện đã tìm);
+          câu 1 của phiếu tự điền Đơn vị cấp 2 của dòng báo cáo dự thảo (defaultQ1, openSurvey) – yêu cầu 21/10
+  - v9: dữ liệu mẫu nhiều hơn – báo cáo T05–T08 (lịch sử) + T10 (đang trong hạn) cho cùng các đơn vị trong ảnh
+        (SITES, HIST, CUR, genSample(), fakeEntry(); số giả lập cố định theo hạt giống); Nhập khảo sát có phiếu
+        Chưa khảo sát cho 9/11 QLBP; Kết quả khảo sát có phân trang (S.page.kq) + Xuất Excel 10 cột (exportKetQua, KQ_COLS)
+  - v8.1: bỏ các khung chú thích trên màn hình (đầu màn, sidebar, trên phiếu, sau khi gửi) và nhãn Đề xuất / Cần chốt
+          trong giao diện; nội dung chuyển vào drawer "Quy tắc · Cần chốt" › Ghi chú màn hình (kèm lối tắt kiểm thử)
+  - v8: lớp giao diện, giữ nguyên bố cục CMS – token màu trạng thái / hạn / mức hài lòng (đã kiểm tra mù màu),
+        chip lọc nhanh, tag có icon, thước 5 nấc, chấm nhắc, avatar, nút biểu tượng, thanh nhắc việc QLBP,
+        Kết quả khảo sát có chấm màu + chú giải, Nhật ký / Mail / 403 làm lại hiển thị. Nghiệp vụ v7 giữ nguyên.
+  - v7: phiếu nhập giống phiếu thật đang phát hành (7 câu C1–C7, phân nhánh theo C2, hiện dần, đánh số theo vị trí,
+        gửi không giới hạn, màn cảm ơn) – QS, pathOf(), visibleQs(), layoutForm(), submitSurvey();
+        màn mới KHẢO SÁT › Kết quả khảo sát: 10 cột như file Excel kết quả của phiếu – RES_COLS, listKetQua()
+  - v6: module riêng KHẢO SÁT, ngay sau BÁO CÁO, gồm 2 màn: Khảo sát cuộc đánh giá · Nhập khảo sát (menu theo quyền: PERM, can())
   - v5.3: đổi tên cột QLBP (Auditee) · QLĐV cấp 2 (Auditee) · Auditor (lưới, phiếu, file Excel)
   - v5.2: Xuất Excel (.xlsx tạo ngay trong trình duyệt, không cần thư viện ngoài) – exportExcel()
-  - Admin / Quản lý Auditor / Auditor: BÁO CÁO › Khảo sát cuộc đánh giá (chỉ xem, theo phạm vi)
-  - QLBP (auditee): menu riêng "Nhập khảo sát" — nhập trước hạn; QLĐV cấp 2 (auditee): menu riêng "Khảo sát đơn vị" — chỉ xem
+  - Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 (auditee): KHẢO SÁT › Khảo sát cuộc đánh giá (chỉ xem, theo phạm vi)
+  - QLBP (auditee): KHẢO SÁT › Nhập khảo sát — nhập trước hạn. Không có quyền → ẩn menu; mở link trực tiếp → 403
   - Không cho đánh giá hộ. Quá 5 ngày chưa nhập → hệ thống tự ghi nhận "5-Rất hài lòng", khóa phiếu
   - Mail khảo sát + nhắc: To QLBP (auditee), CC QLĐV cấp 2 (auditee) + Auditor; có cảnh báo tự ghi nhận
   - Nhắc từ ngày thứ 2 đến ngày thứ 4 sau ngày gửi; đơn vị đã khảo sát thì ngừng nhắc
@@ -16,7 +32,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FTEL CMS · Khảo sát cuộc đánh giá · Prototype v5.3</title>
+<title>FTEL CMS · Khảo sát cuộc đánh giá · Prototype v9.3</title>
 <style>
 :root{
   --blue:#1890ff; --blue-h:#40a9ff; --link:#1b3fa0;
@@ -42,7 +58,7 @@ button,input,select{font-family:inherit}
 .mi{height:34px;display:flex;align-items:center;padding:0 10px 0 28px;cursor:pointer;font-size:12.5px;text-transform:uppercase;color:#333;user-select:none;position:relative}
 .mi .ico{display:inline-flex;width:14px;height:14px;margin-right:10px;color:#595959;flex:0 0 14px}
 .mi .ico svg{width:14px;height:14px}
-.mi.open .ico,.mi.active .ico{color:var(--blue)}
+.mi.grpsel .ico,.mi.active .ico{color:var(--blue)}
 .mi .cv{margin-left:auto;display:inline-flex;color:#8c8c8c}
 .mi .cv svg{width:12px;height:12px}
 .si{height:34px;display:flex;align-items:center;gap:4px;padding:0 7px 0 52px;cursor:pointer;font-size:12.5px;color:#333;position:relative;user-select:none}
@@ -53,6 +69,10 @@ button,input,select{font-family:inherit}
 .tag-new{font-size:9px;line-height:14px;padding:0 4px;border-radius:7px;background:var(--pt);color:#fff;flex:0 0 auto}
 .cnt{margin-left:auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#ff4d4f;color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
 .side-note{margin:10px 12px 0 22px;padding:7px 9px;border:1px dashed var(--pt);border-radius:4px;background:#f5f5fa;font-size:11px;color:#4a4a66;line-height:1.45}
+.mi .tag-new{margin-left:7px;text-transform:none}
+.si.ghost{color:#b1b1c6;cursor:help}
+.si.ghost:hover{color:#7d7da0}
+.tag-hide{font-size:9px;line-height:12px;padding:0 4px;border-radius:7px;border:1px dashed #a9a9c4;color:#8a8aa8;flex:0 0 auto}
 
 /* ---------- Main ---------- */
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
@@ -113,6 +133,9 @@ table.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px
 .grid tr.ent td{background:#f6ffed}
 .grid tr.ent.au td{background:var(--au-bg)}
 .grid td.wrap{white-space:normal;line-height:1.45}
+.grid.kq{table-layout:fixed}
+.grid.kq th{white-space:normal;vertical-align:bottom;line-height:1.3;height:auto;padding:5px 6px}
+.grid.kq td{white-space:normal;line-height:1.4;vertical-align:top;padding:5px 6px;height:auto}
 .grid a{color:var(--link);text-decoration:underline;cursor:pointer}
 .grid .empty{padding:28px;text-align:center;color:var(--mu);height:auto}
 .pager{display:flex;align-items:center;gap:11px;padding:5px 8px;border-top:1px solid var(--gb);font-size:12.5px;background:#fff}
@@ -144,7 +167,7 @@ table.grid{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px
 .anno b{color:var(--pt)}
 .anno .lk{color:var(--pt);text-decoration:underline;cursor:pointer}
 .dx{display:inline-block;font-size:10.5px;line-height:15px;color:var(--pt);border:1px dashed var(--pt);border-radius:3px;padding:0 4px;margin-left:6px;font-weight:400;vertical-align:1px;white-space:nowrap}
-body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noanno .side-note{display:none}
+body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noanno .side-note,body.noanno .si.ghost{display:none}
 
 /* ---------- Modal ---------- */
 #mroot .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;justify-content:center;align-items:flex-start;padding:44px 16px;overflow-y:auto}
@@ -164,7 +187,8 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 .sv-hd{background:var(--fq);color:#fff;padding:46px 40px 30px;position:relative}
 .sv-hd .cl{position:absolute;right:14px;top:10px;color:#fff;opacity:.85;cursor:pointer;font-size:24px;line-height:1}
 .sv-top{display:flex;align-items:center;gap:16px}
-.sv-lg{flex:0 0 95px;height:95px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--fq);font-weight:800;font-size:28px;letter-spacing:1px}
+.sv-lg{flex:0 0 95px;height:95px}
+body:not(.noanno) .sv-lg{outline:1px dashed rgba(255,255,255,.5)}
 .sv-tt{font-size:26px;font-weight:700;line-height:1.5;text-transform:uppercase}
 .sv-in{font-size:12.5px;line-height:1.6;margin-top:22px}
 .sv-in p{margin:0 0 12px}
@@ -193,6 +217,18 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 .sv-ft{display:flex;gap:10px;align-items:center;margin-top:30px}
 .sv-btn{background:var(--fq);color:#fff;border:0;border-radius:4px;height:32px;padding:0 24px;font-weight:700;font-size:13px;cursor:pointer}
 .sv-btn:hover{background:#163f73}
+.qs{display:flex;flex-direction:column}
+.sv-note{font-size:12.5px;color:#555;margin:2px 0 0;line-height:1.5}
+.sv-print{font-size:12.5px;color:#555;margin:30px 0 0}
+.sv-print+.sv-ft{margin-top:12px}
+.sv-x{position:fixed;top:10px;right:18px;color:#fff;font-size:30px;line-height:1;cursor:pointer;z-index:5;opacity:.85}
+.sv-x:hover{opacity:1}
+.sv-wrap{width:940px;max-width:100%}
+.sv-wrap>.anno{margin-bottom:10px}
+.sv-ty{padding:36px 40px 56px}
+.ty-t{font-size:22px;font-weight:700;color:var(--fq);margin-bottom:6px}
+.sv-ty p{margin:0;font-size:13.5px}
+.sv-done+.sv-note,.sv-auto+.sv-note{margin-top:14px}
 
 /* ---------- Mail ---------- */
 .ml-hd{border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:12px;line-height:1.75}
@@ -253,6 +289,173 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 .fs b{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--pt);color:#fff;text-align:center;font-size:11px;line-height:18px;margin-right:6px;padding:0 4px}
 .fs.au{background:var(--au-bg);border-color:var(--au-bd)}
 .fa{text-align:center;color:var(--pt);line-height:1.1}
+
+/* ===================== v8 · Lớp giao diện – giữ nguyên bố cục CMS =====================
+   Token: trạng thái (ok / wa / cr / sy / bl / nu), mức hài lòng s5→s1 (thang phân kỳ, 3 = xám trung tính).
+   Màu luôn đi kèm icon + chữ; chữ phụ #6e6e6e đạt 4.5:1. */
+:root{
+  --mu:#6e6e6e;
+  --ok-tx:#237804;--ok-bg:#f6ffed;--ok-bd:#b7eb8f;--ok-ic:#52c41a;
+  --wa-tx:#ad4e00;--wa-bg:#fff7e6;--wa-bd:#ffd591;--wa-ic:#fa8c16;
+  --cr-tx:#a8071a;--cr-bg:#fff1f0;--cr-bd:#ffa39e;--cr-ic:#f5222d;
+  --sy-tx:#3f4d7a;--sy-bg:#eef1f8;--sy-bd:#c5cce0;--sy-ic:#5b6aa0;
+  --bl-tx:#0958d9;--bl-bg:#e6f4ff;--bl-bd:#91caff;--bl-ic:#1677ff;
+  --nu-tx:#595959;--nu-bg:#f5f5f5;--nu-bd:#e3e3e3;
+  --s5:#237804;--s4:#52c41a;--s3:#a6a6a6;--s2:#fa541c;--s1:#a8071a;--s0:#e6e6e6;
+  --sel-bg:#e6f4ff;
+}
+body{-webkit-font-smoothing:antialiased}
+/* Sidebar: mục đang chọn có nền xanh nhạt (chuẩn menu AntD) */
+.si.active,.mi.active{background:var(--sel-bg)}
+.si:not(.ghost):not(.active):hover{background:#f6faff}
+.cnt{box-shadow:0 0 0 1.5px #fff}
+/* Chú thích prototype: dịu hơn để nội dung CMS nổi */
+.anno{border-color:#bdbdd9;background:#f8f8fc}
+/* Nút & focus bàn phím */
+.btn svg{width:13px;height:13px}
+.btn.sm svg{width:12px;height:12px}
+.btn:focus-visible,.ib:focus-visible,.chip:focus-visible,.sv-btn:focus-visible,.sel select:focus-visible{outline:2px solid #69b1ff;outline-offset:1px}
+.ib{width:26px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:2px;background:#fff;color:#595959;cursor:pointer;padding:0}
+.ib svg{width:14px;height:14px}
+.ib:hover:not(:disabled){color:var(--blue);border-color:var(--blue)}
+.ib:disabled{color:#c9c9c9;background:#fafafa;cursor:not-allowed}
+/* Tag trạng thái: icon + chữ */
+.tag{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px 0 6px;border-radius:10px;border:1px solid;font-size:11.5px;line-height:18px;white-space:nowrap;vertical-align:middle}
+.tag svg{width:12px;height:12px;flex:0 0 12px}
+.tag.ok{color:var(--ok-tx);background:var(--ok-bg);border-color:var(--ok-bd)}.tag.ok svg{color:var(--ok-ic)}
+.tag.wa{color:var(--wa-tx);background:var(--wa-bg);border-color:var(--wa-bd)}.tag.wa svg{color:var(--wa-ic)}
+.tag.cr{color:var(--cr-tx);background:var(--cr-bg);border-color:var(--cr-bd)}.tag.cr svg{color:var(--cr-ic)}
+.tag.sy{color:var(--sy-tx);background:var(--sy-bg);border-color:var(--sy-bd)}.tag.sy svg{color:var(--sy-ic)}
+.tag.bl{color:var(--bl-tx);background:var(--bl-bg);border-color:var(--bl-bd)}.tag.bl svg{color:var(--bl-ic)}
+.tag.nu{color:var(--nu-tx);background:var(--nu-bg);border-color:var(--nu-bd)}
+/* Chip đếm theo trạng thái trên đầu danh sách – bấm để lọc nhanh */
+.sum .chips{display:flex;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 10px;border:1px solid #a7d1ea;border-radius:11px;background:#fff;font:inherit;font-size:12px;color:#333;cursor:pointer;white-space:nowrap}
+.chip i{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.chip b{font-variant-numeric:tabular-nums}
+.chip.ok i{background:var(--ok-ic)}.chip.wa i{background:var(--wa-ic)}.chip.sy i{background:var(--sy-ic)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{border-color:var(--blue);background:var(--bl-bg);color:var(--bl-tx);box-shadow:0 0 0 2px rgba(22,119,255,.12)}
+/* Hạn khảo sát: pill theo mức gấp */
+.pill{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:9px;font-size:11px;margin-left:6px;border:1px solid;white-space:nowrap;vertical-align:1px}
+.pill svg{width:11px;height:11px}
+.pill.wa{color:var(--wa-tx);background:var(--wa-bg);border-color:var(--wa-bd)}
+.pill.cr{color:var(--cr-tx);background:var(--cr-bg);border-color:var(--cr-bd)}
+.pill.nu{color:var(--nu-tx);background:var(--nu-bg);border-color:var(--nu-bd)}
+.due{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.due .pill{margin-left:0;vertical-align:0}
+/* Số lần nhắc: 3 chấm */
+.rd{display:inline-flex;gap:3px;margin-left:7px;vertical-align:middle}
+.rd i{width:6px;height:6px;border-radius:50%;background:#d9d9d9}
+.rd i.on{background:var(--wa-ic)}
+.rdn{font-size:11px;color:var(--mu);margin-left:4px;font-variant-numeric:tabular-nums}
+/* Mức độ hài lòng: thước 5 nấc + nhãn đầy đủ */
+.sc2{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.mt{display:inline-flex;gap:2px;flex:0 0 auto}
+.mt i{width:6px;height:10px;border-radius:2px;background:var(--s0)}
+.sc2.s5 .mt i.f{background:var(--s5)}.sc2.s4 .mt i.f{background:var(--s4)}.sc2.s3 .mt i.f{background:var(--s3)}.sc2.s2 .mt i.f{background:var(--s2)}.sc2.s1 .mt i.f{background:var(--s1)}
+.sc2.au .mt i.f{opacity:.45}
+.au-ic{display:inline-flex;color:var(--sy-ic)}.au-ic svg{width:12px;height:12px}
+/* Người nhập: avatar chữ viết tắt / bánh răng hệ thống */
+.who{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.who .sub-n{margin-left:0}
+.av{width:20px;height:20px;border-radius:50%;background:var(--bl-bg);color:var(--bl-tx);font-size:9.5px;font-weight:700;letter-spacing:.2px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px}
+.av.sy{background:var(--sy-bg);color:var(--sy-tx)}.av svg{width:12px;height:12px}
+/* Lưới các màn KHẢO SÁT (màn hiện có giữ nguyên) */
+.grid.nx th{background:#f5f7fa;color:#262626;border-bottom-color:#e1e7ef}
+.grid.nx td{height:34px;border-bottom-color:#f0f0f0;border-right-color:#f4f4f4}
+.grid.nx tbody tr:hover td:not(.i){background:#f5faff}
+.grid.nx .i{background:#fafafa;color:#8c8c8c}
+.grid.nx tr.todo td{background:#fffcf4}
+.grid.nx tr.todo td.i{box-shadow:inset 3px 0 0 var(--wa-ic);color:var(--wa-tx);font-weight:700}
+.grid.nx tr.todo:hover td:not(.i){background:#fff6e6}
+.grid .es{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--mu)}
+.grid .es svg{width:32px;height:32px;color:#cfcfcf}
+.acts{gap:5px}
+/* Thanh nhắc việc / thông báo */
+.alert{display:flex;align-items:center;gap:10px;border:1px solid;border-radius:4px;padding:8px 12px;margin-bottom:12px;font-size:12.5px;line-height:1.5}
+.alert>svg{width:16px;height:16px;flex:0 0 16px}
+.alert>div{flex:1;min-width:0}
+.alert.wa{background:var(--wa-bg);border-color:var(--wa-bd);color:#5c3a00}.alert.wa>svg{color:var(--wa-ic)}
+.alert.cr{background:var(--cr-bg);border-color:var(--cr-bd);color:#5c0011}.alert.cr>svg{color:var(--cr-ic)}
+/* Kết quả khảo sát */
+.ch{display:inline-flex;align-items:baseline;gap:6px}
+.ch i{width:8px;height:8px;border-radius:50%;flex:0 0 8px;align-self:center}
+.ch.s5 i{background:var(--s5)}.ch.s4 i{background:var(--s4)}.ch.s3 i{background:var(--s3)}.ch.s2 i{background:var(--s2)}.ch.s1 i{background:var(--s1)}
+.grid.kq td.t{font-variant-numeric:tabular-nums;color:#434343}
+.grid.kq td.id{font-variant-numeric:tabular-nums;color:#8c8c8c}
+.grid.kq tr.flash td{animation:kqflash 2.8s ease-out}
+@keyframes kqflash{0%,35%{background:#fff4c2}100%{background:transparent}}
+.hd-r{margin-left:auto;display:flex;align-items:center;gap:14px;font-weight:400;font-size:12px;color:#434343;padding-right:4px}
+.lg5{display:inline-flex;align-items:center;gap:3px}
+.lg5 i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px}
+.lg5 i.s5{background:var(--s5)}.lg5 i.s4{background:var(--s4)}.lg5 i.s3{background:var(--s3)}.lg5 i.s2{background:var(--s2)}.lg5 i.s1{background:var(--s1)}
+/* 403 – trang kết quả */
+.e403.result{padding:46px 24px 50px;line-height:1.6}
+.r-ic{width:64px;height:64px;border-radius:50%;background:var(--bl-bg);color:var(--bl-ic);display:inline-flex;align-items:center;justify-content:center}
+.r-ic svg{width:30px;height:30px}
+.r-code{font-size:34px;font-weight:700;color:#bfbfbf;line-height:1.1;margin-top:12px}
+.r-t{font-size:16px;font-weight:700;color:#262626;margin-top:2px}
+.r-s{margin:6px auto 18px;max-width:600px;color:#595959}
+/* Modal chung */
+.mdl{border-radius:6px}
+.mdl-h{gap:8px}
+.mdl-h>svg{width:16px;height:16px;color:var(--blue)}
+/* Nhật ký */
+.desc{display:grid;grid-template-columns:118px minmax(0,1fr) 118px minmax(0,1fr);border:1px solid #f0f0f0;border-radius:4px;margin:0 0 14px;font-size:12.5px}
+.desc>div{padding:7px 10px;border-bottom:1px solid #f0f0f0;min-height:34px;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.desc .dl{background:#fafafa;color:#595959}
+.desc .wide{grid-column:span 3}
+.desc>div:nth-last-child(-n+2){border-bottom:0}
+.evt{display:inline-flex;align-items:center;gap:7px}
+.ei{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px}
+.ei svg{width:12px;height:12px}
+.ei.nu{background:#f0f0f0;color:#595959}.ei.bl{background:var(--bl-bg);color:var(--bl-ic)}.ei.wa{background:var(--wa-bg);color:var(--wa-ic)}.ei.ok{background:var(--ok-bg);color:var(--ok-ic)}.ei.sy{background:var(--sy-bg);color:var(--sy-ic)}
+/* Mail */
+.ml-subj{font-size:15px;font-weight:700;color:#1f1f1f;line-height:1.45;margin:0 0 10px}
+.ml-meta{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;align-items:center;font-size:12.5px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;margin-bottom:14px}
+.ml-meta .k{color:var(--mu)}
+.addr{display:inline-block;padding:0 8px;border-radius:10px;background:#f5f5f5;border:1px solid #e6e6e6;margin:1px 4px 1px 0;font-size:12px;line-height:18px}
+.addr.to{background:var(--bl-bg);border-color:var(--bl-bd);color:var(--bl-tx)}
+.ml-card{border:1px solid #e8e8e8;border-top:4px solid var(--fq);border-radius:4px;padding:16px 20px 6px}
+.ml-rm,.ml-warn{display:flex;gap:8px;align-items:flex-start}
+.ml-rm svg,.ml-warn svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px}
+.ml-rm svg{color:var(--wa-ic)}.ml-warn svg{color:var(--cr-ic)}
+.ml-cta{display:inline-flex;align-items:center;gap:6px}
+.ml-cta svg{width:14px;height:14px}
+/* Phiếu: chỉ tinh chỉnh hiển thị – nội dung, thứ tự, hành vi giữ đúng phiếu thật */
+.sv{border-radius:10px;box-shadow:0 14px 44px rgba(0,0,0,.35)}
+.sv-bd{padding:22px 40px 34px}
+.sv-note{color:#605e5c}
+.q{margin-top:26px;animation:qin .22s ease-out}
+@keyframes qin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.q-t{font-size:14px;line-height:1.5;color:#201f1e;margin-bottom:10px}
+.q .opts{display:flex;flex-direction:column;gap:2px}
+.opt{min-width:300px;padding:6px 10px;border-radius:4px;font-size:13.5px;color:#201f1e}
+.opt:hover{background:#f3f6fa}
+.opt.on{background:#eef3fa}
+.opt input{width:17px;height:17px}
+.sv.ro .opt{cursor:default}.sv.ro .opt:hover{background:none}.sv.ro .opt.on{background:#eef3fa}
+.q input.ans{height:34px;border:1px solid #c8c6c4;border-radius:4px;padding:0 12px;font-size:13.5px}
+.q input.ans:hover:not(:disabled){border-color:#8a8886}
+.q input.ans:focus{border-color:var(--fq);box-shadow:0 0 0 1px var(--fq)}
+.q .em{align-items:center;gap:6px;margin:8px 0 0 18px}
+.q.err .em{display:flex}
+.q .em::before{content:"!";width:14px;height:14px;border-radius:50%;background:#c50f1f;color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 14px}
+.sv-btn{height:34px;padding:0 30px;border-radius:4px}
+.sv-x{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14);font-size:24px;top:12px;right:16px}
+.sv-x:hover{background:rgba(255,255,255,.28)}
+.ty-ic{width:52px;height:52px;border-radius:50%;background:#eef3fa;color:var(--fq);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.ty-ic svg{width:26px;height:26px}
+/* Bảng điều khiển prototype & drawer */
+#proto{border:1px solid #c9c9dc;border-radius:10px}
+.pt-h{border-radius:9px 9px 0 0}
+#proto.min .pt-h{border-radius:9px}
+.dr-b h4{border-bottom:1px solid #ececf4;padding-bottom:5px}
+.dr-b table tr:nth-child(even) td{background:#fbfbfd}
+.dr-b .lk{color:var(--pt);text-decoration:underline;cursor:pointer}
+.dr-b ul.notes li{margin:5px 0}
+.dr-b .shortcut{margin:8px 0 0;padding:7px 10px;border:1px solid #e4e4ee;border-radius:4px;background:#f8f8fc;font-size:12px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -271,30 +474,82 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 <aside class="drawer" id="drawer" aria-label="Quy tắc nghiệp vụ">
   <div class="dr-h">Khảo sát cuộc đánh giá · Quy tắc &amp; cần chốt<span class="cl" data-act="closenotes">×</span></div>
   <div class="dr-b">
-    <p><span class="tg yc">Yêu cầu</span> theo yêu cầu 19/10/2026 · <span class="tg dx2">Đề xuất</span> BA đề xuất, chờ chốt</p>
+    <p><span class="tg yc">Yêu cầu</span> theo yêu cầu 19–21/10/2026 · <span class="tg dx2">Đề xuất</span> BA đề xuất, chờ chốt</p>
 
     <div class="chg">
-      <h4>Thay đổi v5 – v5.3 (19/10)</h4>
+      <h4>Thay đổi v9.3 (21/10)</h4>
       <ul>
-        <li><b>Không cho đánh giá hộ</b>: bỏ chức năng Auditor nhập hộ. Chỉ QLBP (auditee) được nhập; các vai trò khác chỉ xem.</li>
-        <li>Quá 5 ngày chưa nhập → <b>hệ thống tự ghi nhận "5-Rất hài lòng"</b>, khóa phiếu, không cho nhập. Mail khảo sát có <b>cảnh báo</b> quy tắc này. Bỏ trạng thái Quá hạn / Trễ hạn và nút Nhắc lại.</li>
-        <li>Phân quyền xem: Admin tất cả; Quản lý Auditor; Auditor; QLBP và QLĐV cấp 2 (auditee) chỉ đơn vị mình.</li>
-        <li><b>v5.1</b>: đầu Danh sách khảo sát chỉ giữ số đếm theo trạng thái (Đã khảo sát · Tự ghi nhận · Chưa khảo sát); bỏ tổng và điểm hài lòng trung bình.</li>
-        <li><b>v5.2</b>: thêm nút <b>Xuất Excel</b> trên Danh sách khảo sát.</li>
-        <li><b>v5.3</b>: đổi tên cột <b>QLBP (Auditee)</b> · <b>QLĐV cấp 2 (Auditee)</b> · <b>Auditor</b> (lưới, phiếu, file Excel).</li>
+        <li><b>Số câu và nhánh – đã chốt</b>: anh Hieu gửi 2 bộ câu từ phiếu thật. Câu 2 chọn 2/1 → 1 Tên bộ phận · 2 Mức độ hài lòng chung · 3 Góp ý · 4 Thời gian · 5 Tiêu chí · 6 Báo cáo · 7 Thái độ; câu 2 chọn 5/4/3 → 1 Tên bộ phận · 2 Mức độ hài lòng chung · 3 Thời gian · 4 Tiêu chí · 5 Báo cáo · 6 Thái độ · 7 Góp ý. Prototype khớp cả 2 bộ (đã so từng chữ, thứ tự, lựa chọn, kiểu câu); không đổi logic phiếu.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v9.2 (21/10)</h4>
+      <ul>
+        <li><b>Kết quả khảo sát</b>: ô <b>Đơn vị được kiểm soát</b> chỉ tìm theo <b>Đơn vị cấp 2</b> – danh sách chọn chỉ gồm Đơn vị cấp 2 trong phạm vi xem, không còn nhóm Đơn vị cấp 1 <span class="tg yc">Yêu cầu</span>. Màn Khảo sát cuộc đánh giá giữ nguyên cấp 1 + cấp 2 (Cần chốt 15).</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v9.1 (21/10)</h4>
+      <ul>
+        <li><b>Kết quả khảo sát</b>: thêm khung <b>Thông tin tìm kiếm</b> theo mẫu màn Khảo sát cuộc đánh giá: Tên báo cáo · Thời gian hoàn thành (từ – đến) · Mức độ hài lòng (câu 2) · Đơn vị được kiểm soát · Auditor · Đơn vị kiểm soát; mặc định không giới hạn thời gian <span class="tg dx2">Đề xuất</span>. Nút <b>Xuất Excel</b> chuyển xuống cạnh Tìm kiếm, xuất đúng kết quả đang tìm kiếm (toàn bộ các trang).</li>
+        <li><b>Phiếu</b>: câu 1 "Tên Bộ phận &amp; đơn vị của Anh/Chị" <b>tự điền Đơn vị cấp 2</b> của dòng báo cáo dự thảo <span class="tg yc">Yêu cầu</span>; QLBP vẫn sửa được, xóa trống thì báo lỗi bắt buộc như cũ <span class="tg dx2">Đề xuất</span>. Tự ghi nhận quá hạn và dữ liệu mẫu: câu 1 = Đơn vị cấp 2.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v9 (21/10)</h4>
+      <ul>
+        <li><b>Dữ liệu mẫu nhiều hơn</b> (giả lập, cùng các đơn vị trong ảnh): thêm báo cáo T05–T08 (lịch sử) và báo cáo T10 gửi 14–19/10 cho cả 5 site. Kết quả khảo sát có <b>46</b> câu trả lời; Khảo sát cuộc đánh giá (tháng 10) có 22 dòng.</li>
+        <li><b>Nhập khảo sát</b>: 9/11 QLBP có phiếu <i>Chưa khảo sát</i> với các mức hạn khác nhau (hôm nay, còn 1, 2, 5 ngày); 2 QLBP đã gửi trong hạn (có nút Gửi thêm). Bảng Prototype ghi số phiếu chưa nhập cạnh từng QLBP để dễ chọn.</li>
+        <li><b>Kết quả khảo sát</b>: thêm phân trang như các lưới CMS (10 / 20 / 50, mặc định 20); Id tăng dần, dòng mới ở trang cuối; vừa gửi phiếu thì mở đúng trang có dòng mới.</li>
+        <li><b>Kết quả khảo sát</b>: thêm nút <b>Xuất Excel</b> (theo góp ý "Xuất" trên ảnh): file .xlsx đúng 10 cột như bảng, toàn bộ các trang trong phạm vi xem; QLĐV cấp 2 không có nút <span class="tg dx2">Đề xuất</span>.</li>
+        <li>Số câu và nhánh: giữ theo đặc tả phiếu ngày 20/10 (7 câu, nhánh theo câu 2); chưa đối chiếu trực tiếp được với link phiếu – xem Cần chốt 14.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v8.1 (21/10)</h4>
+      <ul>
+        <li>Bỏ các khung chú thích trên màn hình (đầu các màn, sidebar, trên phiếu, sau khi gửi) và nhãn Đề xuất / Cần chốt trong giao diện (mail, phiếu tự ghi nhận, trang 403, tooltip). Nội dung chuyển vào mục <b>Ghi chú màn hình</b> ngay dưới; lối tắt kiểm thử chuyển vào đây.</li>
+      </ul>
+      <h4 style="margin-top:12px">Thay đổi v8 (20/10) · giao diện</h4>
+      <ul>
+        <li>Giữ nguyên bố cục CMS (sidebar, breadcrumb, khung tìm kiếm, lưới, phân trang); chỉ làm lại phần hiển thị trong các màn KHẢO SÁT. Màn hiện có Báo cáo dự thảo giữ nguyên. Nghiệp vụ v7 không đổi.</li>
+        <li>Đầu danh sách: số đếm theo trạng thái thành chip, bấm để lọc nhanh <span class="tg dx2">Đề xuất</span>; vẫn chỉ là số đếm, không tổng, không trung bình (BR12).</li>
+        <li>Lưới: tag trạng thái có icon; hạn còn n ngày đổi màu theo mức gấp; 3 chấm số lần nhắc; mức độ hài lòng = thước 5 nấc + nhãn; người nhập có ảnh đại diện; thao tác dạng nút biểu tượng có tooltip.</li>
+        <li>Nhập khảo sát (QLBP): thanh nhắc việc "có n phiếu cần khảo sát" + nút <b>Khảo sát ngay</b>; dòng cần làm được tô nhấn <span class="tg dx2">Đề xuất</span>.</li>
+        <li>Kết quả khảo sát: chấm màu theo mức ở ô câu chọn (giữ nguyên nhãn), chú giải thang màu, dòng vừa gửi nháy sáng; vẫn đúng 10 cột.</li>
+        <li>Phiếu: chỉ tinh chỉnh hiển thị (khoảng cách, ô chọn, ô nhập, lỗi có biểu tượng, câu mới hiện nhẹ); không đổi nội dung, thứ tự, hành vi; không thêm thanh tiến trình.</li>
+        <li>Nhật ký: khung thông tin dạng bảng mô tả, icon theo loại sự kiện. Mail: tiêu đề nổi bật, người nhận dạng chip, thân mail dạng thẻ. 403 dạng trang kết quả.</li>
       </ul>
     </div>
 
+    <h4>Ghi chú màn hình</h4>
+    <ul class="notes">
+      <li><b>Module KHẢO SÁT</b> (ngay sau BÁO CÁO): Khảo sát cuộc đánh giá (theo dõi, theo phạm vi) · Nhập khảo sát (chỉ QLBP auditee; phiếu giống phiếu thật, 7 câu) · Kết quả khảo sát (bảng như file Excel kết quả). Không ai được đánh giá hộ. Quá hạn 5 ngày chưa nhập → hệ thống tự ghi nhận "5-Rất hài lòng", khóa phiếu; mail khảo sát có cảnh báo.</li>
+      <li><b>Khảo sát cuộc đánh giá</b>: chỉ xem. Admin xem tất cả; Quản lý Auditor xem đơn vị do các Auditor mình quản lý phụ trách; Auditor xem đơn vị mình kiểm soát; QLĐV cấp 2 (auditee) xem đơn vị mình, không Xuất Excel, không xem báo cáo <span class="tg dx2">Đề xuất</span>.</li>
+      <li><b>Nhập khảo sát</b> (QLBP auditee): chỉ phiếu của đơn vị mình, không xem được báo cáo. <b>Khảo sát</b> mở phiếu giống phiếu thật (7 câu, phân nhánh theo câu 2); còn hạn thì <b>Gửi thêm</b> được vì phiếu thật không giới hạn số lần gửi <span class="tg dx2">Đề xuất</span>. Quá hạn chưa nhập → hệ thống tự ghi nhận, không nhập được nữa.</li>
+      <li><b>Phiếu khảo sát</b>: giống phiếu thật, không thêm thông tin CMS (không hiện tên cuộc đánh giá, không có hạn trong phiếu); riêng câu 1 tự điền Đơn vị cấp 2 của dòng báo cáo dự thảo (yêu cầu 21/10), QLBP sửa được <span class="tg dx2">Đề xuất</span>. Thời gian bắt đầu = lúc mở phiếu; khi gửi, giờ giả lập cộng thêm thời gian điền thật. Nút × chỉ để đóng phiếu trên prototype. Gửi xong: thêm 1 dòng ở Kết quả khảo sát; lần gửi đầu → dòng theo dõi chuyển Đã khảo sát, ngừng nhắc.</li>
+      <li><b>Xem phiếu tự ghi nhận</b>: câu 1 = Đơn vị cấp 2 (như câu 1 tự điền); câu 3–7 không có dữ liệu (Cần chốt 11); không có dòng ở Kết quả khảo sát.</li>
+      <li><b>Kết quả khảo sát</b>: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột cố định theo mã C1–C7 (câu Góp ý luôn ở cột cuối, kể cả khi trả lời ở vị trí số 3); ô câu chọn lưu nguyên nhãn; thời gian dd/MM/yyyy HH:mm:ss. Không có cột Email, Tên và các câu cũ đã xóa. Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; tự ghi nhận quá hạn không có dòng <span class="tg dx2">Đề xuất</span>. Phân trang 10 / 20 / 50 (mặc định 20), Id tăng dần, dòng mới ở trang cuối; khung <b>Thông tin tìm kiếm</b>: Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – yêu cầu 21/10), Auditor, Đơn vị kiểm soát – lọc theo dòng báo cáo dự thảo gắn với câu trả lời (không theo chữ ở câu 1), mặc định không giới hạn thời gian; nút <b>Xuất Excel</b> cạnh Tìm kiếm (Admin / Quản lý Auditor / Auditor) xuất đúng 10 cột, đúng kết quả đang tìm kiếm, toàn bộ các trang <span class="tg dx2">Đề xuất</span>.</li>
+      <li><b>Báo cáo dự thảo</b> (màn hiện có, giữ nguyên): mỗi dòng có Đơn vị cấp 1/cấp 2 → tự sinh 1 dòng ở Khảo sát cuộc đánh giá và gửi mail khảo sát To QLBP, CC QLĐV cấp 2 + Auditor (BR01–BR02). QLBP và QLĐV cấp 2 (auditee) không vào được màn này (BR07). Dòng trống cả 2 đơn vị → không sinh (BR10 · Đề xuất).</li>
+      <li><b>Sidebar</b>: QLBP (auditee) chỉ thấy KHẢO SÁT › Nhập khảo sát; QLĐV cấp 2 (auditee) chỉ thấy Khảo sát cuộc đánh giá và Kết quả khảo sát; cả hai không có menu BÁO CÁO (BR07). Mục mờ có nhãn "Ẩn" = vai trò hiện tại không có quyền, hệ thống thật ẩn hẳn (chỉ hiện khi bật Chú thích).</li>
+      <li><b>Mail khảo sát / mail nhắc</b>: nội dung là mẫu <span class="tg dx2">Đề xuất</span>. Trang 403: câu thông báo theo màn bị chặn, nút về màn chính của vai trò <span class="tg dx2">Đề xuất</span>.</li>
+    </ul>
+    <div class="shortcut"><b>Lối tắt kiểm thử</b> (mở bằng vai trò đang chọn, không có quyền → 403): <span class="lk" data-act="nav" data-k="baocao">Báo cáo dự thảo</span> · <span class="lk" data-act="nav" data-k="khaosat">Khảo sát cuộc đánh giá</span> · <span class="lk" data-act="nav" data-k="nhapks">Nhập khảo sát</span> · <span class="lk" data-act="nav" data-k="ketqua">Kết quả khảo sát</span> · <span class="lk" data-act="seeresult">Kết quả khảo sát bằng vai trò Admin</span></div>
+
+    <h4>Chuẩn giao diện (v8)</h4>
+    <table>
+      <tr><th>Thành phần</th><th>Quy ước</th></tr>
+      <tr><td>Trạng thái</td><td><span class="tag wa">Chưa khảo sát</span> cam · <span class="tag ok">Đã khảo sát</span> xanh lá · <span class="tag sy">Tự ghi nhận</span> chàm. Luôn có icon + chữ, không dùng màu đơn lẻ.</td></tr>
+      <tr><td>Hạn khảo sát</td><td>Chỉ dòng Chưa khảo sát: <span class="pill nu">còn ≥ 3 ngày</span> <span class="pill wa">còn 1–2 ngày</span> <span class="pill cr">hôm nay</span></td></tr>
+      <tr><td>Mức hài lòng (5 → 1)</td><td>Thang phân kỳ: 5 xanh đậm · 4 xanh · 3 xám (trung tính) · 2 cam đỏ · 1 đỏ đậm; thước 5 nấc + nhãn đầy đủ. Đã chạy kiểm tra mù màu: các mức kề nhau ΔE ≥ 13.</td></tr>
+      <tr><td>Nhắc</td><td>3 chấm = 3 lần nhắc (ngày thứ 2, 3, 4); chấm cam = đã gửi.</td></tr>
+      <tr><td>Người nhập</td><td>Ảnh đại diện chữ viết tắt (xanh) = QLBP · bánh răng (chàm) = Hệ thống tự ghi nhận.</td></tr>
+      <tr><td>Thao tác</td><td>Nút biểu tượng 26×24: Xem (mắt), Nhật ký (đồng hồ); có tooltip và nhãn cho trình đọc màn hình.</td></tr>
+      <tr><td>Chữ, số</td><td>Arial như CMS; chữ phụ #6e6e6e (đạt 4.5:1); số trong bảng canh đều cột.</td></tr>
+    </table>
+
     <h4>Phân quyền</h4>
     <table>
-      <tr><th>Vai trò</th><th>Màn hình</th><th>Phạm vi xem</th><th>Thao tác</th></tr>
-      <tr><td><b>Admin</b></td><td>BÁO CÁO › Khảo sát cuộc đánh giá</td><td>Tất cả</td><td>Xem, Nhật ký</td></tr>
-      <tr><td><b>Quản lý Auditor</b><br><span class="mu">QLBP / QLĐV phía Auditor</span></td><td>BÁO CÁO › Khảo sát cuộc đánh giá</td><td>Tất cả đơn vị do các Auditor mình quản lý phụ trách</td><td>Xem, Nhật ký</td></tr>
-      <tr><td><b>Auditor</b></td><td>BÁO CÁO › Khảo sát cuộc đánh giá</td><td>Đơn vị mình kiểm soát</td><td>Xem, Nhật ký</td></tr>
-      <tr><td><b>QLBP</b> (auditee)</td><td>Menu riêng <b>Nhập khảo sát</b>, không có menu BÁO CÁO</td><td>Đơn vị mình</td><td>Khảo sát (trước hạn), Xem</td></tr>
-      <tr><td><b>QLĐV cấp 2</b> (auditee)</td><td>Menu riêng <b>Khảo sát đơn vị</b>, không có menu BÁO CÁO <span class="tg dx2">Đề xuất</span></td><td>Đơn vị mình</td><td>Xem</td></tr>
+      <tr><th>Vai trò</th><th>Màn hình trong module KHẢO SÁT</th><th>Phạm vi xem</th><th>Thao tác</th></tr>
+      <tr><td><b>Admin</b></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Tất cả</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
+      <tr><td><b>Quản lý Auditor</b><br><span class="mu">QLBP / QLĐV phía Auditor</span></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Tất cả đơn vị do các Auditor mình quản lý phụ trách</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
+      <tr><td><b>Auditor</b></td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát</td><td>Đơn vị mình kiểm soát</td><td>Xem, Nhật ký, Xuất Excel</td></tr>
+      <tr><td><b>QLBP</b> (auditee)</td><td>Nhập khảo sát · không có menu BÁO CÁO</td><td>Đơn vị mình</td><td>Khảo sát, Gửi thêm (còn hạn), Xem</td></tr>
+      <tr><td><b>QLĐV cấp 2</b> (auditee)</td><td>Khảo sát cuộc đánh giá · Kết quả khảo sát · không có menu BÁO CÁO <span class="tg dx2">Đề xuất</span></td><td>Đơn vị mình</td><td>Xem, Nhật ký</td></tr>
     </table>
-    <p class="mu" style="margin:6px 0 0">Không vai trò nào được đánh giá hộ QLBP.</p>
+    <p class="mu" style="margin:6px 0 0">Màn không có quyền: ẩn menu; mở link trực tiếp → 403 <span class="tg dx2">Đề xuất</span>. Không vai trò nào được đánh giá hộ QLBP.</p>
 
     <h4>Luồng</h4>
     <div class="flow">
@@ -302,9 +557,22 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
       <div class="fs"><b>2</b>Tự sinh dòng khảo sát · <i>Chưa khảo sát</i> · Hạn = ngày gửi + 5 ngày</div><div class="fa">↓</div>
       <div class="fs"><b>3</b>Mail khảo sát · To: QLBP · CC: QLĐV cấp 2, Auditor · <b>có cảnh báo tự ghi nhận</b></div><div class="fa">↓</div>
       <div class="fs"><b>4</b>Nhắc ngày thứ 2, 3, 4 sau ngày gửi (đơn vị đã khảo sát thì ngừng)</div><div class="fa">↓</div>
-      <div class="fs"><b>5a</b>QLBP nhập trước hạn → <i>Đã khảo sát</i></div>
+      <div class="fs"><b>5a</b>QLBP nhập phiếu 7 câu tại KHẢO SÁT › Nhập khảo sát, trước hạn → <i>Đã khảo sát</i> · mỗi lần gửi thêm 1 dòng ở Kết quả khảo sát</div>
       <div class="fs au" style="margin-top:4px"><b>5b</b>Quá hạn chưa nhập → hệ thống tự ghi nhận <b>"5-Rất hài lòng"</b> · <i>Tự ghi nhận</i> · khóa phiếu</div>
     </div>
+
+    <h4>Phiếu khảo sát · mã cố định C1–C7</h4>
+    <table>
+      <tr><th>Mã</th><th>Câu hỏi</th><th>Kiểu</th><th>Lựa chọn</th></tr>
+      <tr><td>C1</td><td>Tên Bộ phận &amp; đơn vị của Anh/Chị (ví dụ: Phòng ... - Chi nhánh...)</td><td>Chữ 1 dòng · <b>tự điền Đơn vị cấp 2</b> (v9.1)</td><td>"Nhập câu trả lời của bạn"</td></tr>
+      <tr><td>C2</td><td>Mức độ hài lòng chung của anh/chị về cuộc đánh giá?</td><td>Chọn 1 · có nhánh</td><td>5-Rất hài lòng · 4-Hài lòng · 3-Bình thường · 2-Không hài lòng · 1-Rất không hài lòng</td></tr>
+      <tr><td>C3</td><td>Thời gian đoàn đánh giá làm việc có phù hợp với đơn vị (Không rơi vào đầu/cuối tháng hoặc không ảnh hưởng tới công việc của đơn vị)</td><td>Chọn 1 · có nhánh</td><td>5-Đồng ý · 4-Đồng ý một phần · 3-Bình thường · 2-Không hoàn toàn đồng ý · 1-Không đồng ý</td></tr>
+      <tr><td>C4</td><td>Các tiêu chí đánh giá có phù hợp, sát với thực tế hoạt động đơn vị không?</td><td>Chọn 1 · có nhánh</td><td>như C3</td></tr>
+      <tr><td>C5</td><td>Báo cáo đánh giá hữu ích với đơn vị</td><td>Chọn 1 · có nhánh</td><td>như C3</td></tr>
+      <tr><td>C6</td><td>Thái độ làm việc và cách thức tương tác của đoàn đánh giá</td><td>Chọn 1</td><td>như C2</td></tr>
+      <tr><td>C7</td><td>Điều gì anh/chị thấy chưa phù hợp / cần cải thiện hoặc góp ý về cuộc đánh giá</td><td>Chữ 1 dòng</td><td>như C1</td></tr>
+    </table>
+    <p class="mu" style="margin:6px 0 0">Cả 7 câu bắt buộc, không có lựa chọn "Khác". Thứ tự: C2 = 5/4/3 → C1 … C7; C2 = 2/1 → C1, C2, <b>C7</b>, C3, C4, C5, C6.</p>
 
     <h4>Quy tắc</h4>
     <ol class="br">
@@ -312,16 +580,21 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
       <li><b>BR02</b> <span class="tg yc">Yêu cầu</span> Sinh dòng khảo sát → gửi mail khảo sát <b>To: QLBP (auditee)</b>, <b>CC: QLĐV cấp 2 (auditee) + Auditor</b>. Mail có <b>cảnh báo</b>: quá 5 ngày không nhập, hệ thống tự ghi nhận "5-Rất hài lòng". <span class="tg dx2">Đề xuất</span> Mail nhắc cũng có cảnh báo; link trong mail mở thẳng phiếu sau khi đăng nhập.</li>
       <li><b>BR03</b> <span class="tg yc">Yêu cầu</span> Hạn khảo sát = ngày gửi + 5 ngày (VD gửi 05/10 → hạn 10/10). <span class="tg dx2">Đề xuất</span> Ngày gửi = ngày 0; tính ngày lịch; hết hạn lúc 23:59 ngày hạn.</li>
       <li><b>BR04</b> <span class="tg yc">Yêu cầu</span> Chưa khảo sát → nhắc <b>từ ngày thứ 2 đến ngày thứ 4</b>, To/CC như BR02; đơn vị đã khảo sát → ngừng nhắc. <span class="tg dx2">Đề xuất</span> Gửi 05/10 → nhắc 07, 08, 09/10 lúc 08:00, tối đa 3 lần.</li>
-      <li><b>BR05</b> <span class="tg yc">Yêu cầu</span> Quá hạn mà QLBP chưa nhập → hệ thống <b>tự động ghi nhận "5-Rất hài lòng"</b>; quá hạn <b>không cho nhập</b>. <span class="tg dx2">Đề xuất</span> Job 00:00 ngày sau hạn chốt phiếu; trạng thái <i>Tự ghi nhận</i>; Người nhập = Hệ thống; câu 1 lấy "Đơn vị cấp 2 - Đơn vị cấp 1"; phiếu khóa; Nhật ký ghi rõ.</li>
+      <li><b>BR05</b> <span class="tg yc">Yêu cầu</span> Quá hạn mà QLBP chưa nhập → hệ thống <b>tự động ghi nhận "5-Rất hài lòng"</b>; quá hạn <b>không cho nhập</b>. <span class="tg dx2">Đề xuất</span> Job 00:00 ngày sau hạn chốt phiếu; trạng thái <i>Tự ghi nhận</i>; Người nhập = Hệ thống; câu 1 = Đơn vị cấp 2 (như câu 1 tự điền); phiếu khóa; Nhật ký ghi rõ. Chỉ ghi câu 2, câu 3–7 để trống (Cần chốt 11); không tạo dòng ở Kết quả khảo sát.</li>
       <li><b>BR06</b> <span class="tg yc">Yêu cầu</span> <b>Không cho đánh giá hộ</b>: chỉ QLBP (auditee) của đơn vị được nhập phiếu.</li>
-      <li><b>BR07</b> <span class="tg yc">Yêu cầu</span> Phân quyền xem: <b>Admin</b> tất cả; <b>Quản lý Auditor</b> (QLBP / QLĐV phía Auditor) xem tất cả đơn vị do các Auditor mình quản lý phụ trách; <b>Auditor</b> chỉ đơn vị mình kiểm soát; <b>QLBP và QLĐV cấp 2 (auditee)</b> chỉ đơn vị mình. <span class="tg dx2">Đề xuất</span> QLBP và QLĐV cấp 2 chỉ có menu khảo sát riêng, không xem được báo cáo (mở màn báo cáo → <i>Không có quyền truy cập</i>); QLĐV cấp 2 chỉ xem.</li>
-      <li><b>BR08</b> <span class="tg yc">Yêu cầu</span> Log hiển thị rõ ai là người nhập. <span class="tg dx2">Đề xuất</span> Cột <b>Người nhập</b>: tài khoản QLBP, hoặc <i>Hệ thống · Tự ghi nhận</i>; lọc theo Người nhập; Nhật ký gồm sinh dòng, mail (To/CC, xem nội dung), nhắc, gửi phiếu / tự ghi nhận.</li>
+      <li><b>BR07</b> <span class="tg yc">Yêu cầu</span> Phân quyền xem: <b>Admin</b> tất cả; <b>Quản lý Auditor</b> (QLBP / QLĐV phía Auditor) xem tất cả đơn vị do các Auditor mình quản lý phụ trách; <b>Auditor</b> chỉ đơn vị mình kiểm soát; <b>QLBP và QLĐV cấp 2 (auditee)</b> chỉ đơn vị mình. <span class="tg dx2">Đề xuất</span> QLBP và QLĐV cấp 2 chỉ thấy module KHẢO SÁT (QLBP: Nhập khảo sát; QLĐV cấp 2: Khảo sát cuộc đánh giá, chỉ xem), không xem được báo cáo (mở màn báo cáo → <i>Không có quyền truy cập</i>).</li>
+      <li><b>BR08</b> <span class="tg yc">Yêu cầu</span> Log hiển thị rõ ai là người nhập. <span class="tg dx2">Đề xuất</span> Cột <b>Người nhập</b>: tài khoản QLBP của lần gửi gần nhất (kèm số lần gửi), hoặc <i>Hệ thống · Tự ghi nhận</i>; lọc theo Người nhập; Nhật ký gồm sinh dòng, mail (To/CC, xem nội dung), nhắc, từng lần gửi phiếu (Id kết quả) / tự ghi nhận.</li>
       <li><b>BR09</b> <span class="tg dx2">Đề xuất</span> To: QLBP (auditee) của dòng khảo sát. CC: QLĐV của Đơn vị cấp 2 đó + Auditor của báo cáo. Dòng không có Đơn vị cấp 2 → chỉ CC Auditor.</li>
       <li><b>BR10</b> <span class="tg dx2">Đề xuất</span> Gửi lại báo cáo (Lần gửi &gt; 1): không sinh thêm dòng, không gửi lại mail. Dòng báo cáo trống cả Đơn vị cấp 1 và cấp 2 → không sinh khảo sát.</li>
-      <li><b>BR11</b> <span class="tg dx2">Đề xuất</span> Câu 1 tự điền "Đơn vị cấp 2 - Đơn vị cấp 1", cho sửa. Câu 2 bắt buộc. Gửi có xác nhận, gửi xong khóa. Đang mở phiếu mà qua hạn → không gửi được.</li>
+      <li><b>BR11</b> <span class="tg yc">Yêu cầu</span> Phiếu nhập giống phiếu thật, không tự cải tiến: tiêu đề "[FTQ] PHIẾU KHẢO SÁT CHẤT LƯỢNG VÀ HIỆU QUẢ CUỘC ĐÁNH GIÁ", 2 đoạn mô tả, dòng "Khi bạn gửi biểu mẫu này, nó sẽ không tự động thu thập…", chú thích "* Bắt buộc", 7 câu C1–C7 (bảng trên, mỗi câu có * đỏ), dòng "Bạn có thể in một bản sao câu trả lời của mình sau khi bạn gửi" và nút <b>Gửi</b>. Logo FTQ để trống khi chưa có ảnh; không dùng logo, tên của nền tảng biểu mẫu. Không thanh tiến trình. <span class="tg yc">Yêu cầu 21/10</span> Ngoại lệ: câu 1 <b>tự điền Đơn vị cấp 2</b> của dòng báo cáo dự thảo (phiếu thật để trống). <span class="tg dx2">Đề xuất</span> Câu 1 tự điền vẫn sửa được, xóa trống → lỗi bắt buộc; dòng không có Đơn vị cấp 2 → điền Đơn vị cấp 1. Đang mở phiếu mà qua hạn → không gửi được (BR05).</li>
       <li><b>BR12</b> <span class="tg yc">Yêu cầu</span> Đầu Danh sách khảo sát chỉ hiện số đếm theo trạng thái: Đã khảo sát · Tự ghi nhận · Chưa khảo sát (theo vai trò và bộ lọc). Không hiện tổng, không tính điểm trung bình.</li>
-      <li><b>BR13</b> <span class="tg dx2">Đề xuất</span> Lọc Thời gian báo cáo theo Thời gian gửi báo cáo, mặc định đầu tháng → hôm nay. Màn của QLBP / QLĐV cấp 2 mặc định hiện tất cả phiếu.</li>
+      <li><b>BR13</b> <span class="tg dx2">Đề xuất</span> Lọc Thời gian báo cáo theo Thời gian gửi báo cáo, mặc định đầu tháng → hôm nay. Màn Nhập khảo sát (QLBP) mặc định hiện tất cả phiếu; màn Kết quả khảo sát mặc định không giới hạn Thời gian hoàn thành.</li>
       <li><b>BR14</b> <span class="tg yc">Yêu cầu</span> Xuất Excel danh sách khảo sát. <span class="tg dx2">Đề xuất</span> Nút <b>Xuất Excel</b> cạnh Tìm kiếm, cho Admin / Quản lý Auditor / Auditor; xuất đúng danh sách đang hiển thị (phạm vi theo quyền + điều kiện đã Tìm kiếm, toàn bộ các trang); file .xlsx gồm người xuất, thời gian xuất, điều kiện lọc, số đếm theo trạng thái và 20 cột (thêm Tháng KS, Đơn vị kiểm soát, câu trả lời câu 1, điểm số); tên file Khao_sat_cuoc_danh_gia_yyyyMMdd_HHmm.xlsx.</li>
+      <li><b>BR15</b> <span class="tg yc">Yêu cầu</span> Module <b>KHẢO SÁT</b> riêng, đặt ngay sau module BÁO CÁO, gồm 2 màn: <b>Khảo sát cuộc đánh giá</b> và <b>Nhập khảo sát</b> (v7 thêm <b>Kết quả khảo sát</b> – BR19). <span class="tg dx2">Đề xuất</span> Menu hiện theo quyền (bảng Phân quyền); không có quyền → ẩn menu, mở link trực tiếp → 403; vào màn nào thì tự mở nhóm menu chứa màn đó.</li>
+      <li><b>BR16</b> <span class="tg yc">Yêu cầu</span> Thứ tự câu theo đáp án C2: 5/4/3 → C1, C2, C3, C4, C5, C6, C7; 2/1 → C1, C2, <b>C7</b>, C3, C4, C5, C6. Cả 2 nhánh đủ 7 câu, đều bắt buộc. Số thứ tự đánh theo vị trí hiển thị, không theo mã (nhánh 2/1: C7 là "3.", C3 là "4.", C6 là "7."). Đã đối chiếu 21/10 với 2 bộ câu theo nhánh từ phiếu thật: khớp.</li>
+      <li><b>BR17</b> <span class="tg yc">Yêu cầu</span> Hiện dần: mở phiếu chỉ thấy câu 1 và 2. C2, C3, C4, C5 có cấu hình nhánh → câu kế trên đường đi chỉ hiện khi câu này đã chọn; câu khác không chặn, câu kế hiện cùng lúc (nhánh 2/1: chọn C2 → C7 và C3 hiện cùng lúc; nhánh 5/4/3: chọn C5 → C6 và C7 hiện cùng lúc). Đổi C2 giữa chừng → tính lại thứ tự, đánh số lại ngay, giữ các câu đã trả lời (câu nằm sau một câu nhánh chưa chọn thì tạm ẩn, vẫn giữ câu trả lời).</li>
+      <li><b>BR18</b> <span class="tg yc">Yêu cầu</span> Gửi: còn câu bắt buộc chưa trả lời → chặn, báo lỗi ngay dưới câu đó. Ô chữ 1 dòng, không giới hạn độ dài, không kiểm tra nội dung ("." hợp lệ). Không giới hạn số lần gửi; phiếu không yêu cầu đăng nhập, không lưu tên hay email. Sau khi gửi hiện màn cảm ơn đơn giản (phiếu thật không đặt lời cảm ơn riêng). <span class="tg dx2">Đề xuất</span> Chuỗi lỗi "Câu hỏi này là bắt buộc."; lời cảm ơn "Cảm ơn bạn! Câu trả lời của bạn đã được gửi."; trong CMS, QLBP mở phiếu từ dòng khảo sát (đã đăng nhập) – xem Cần chốt 9.</li>
+      <li><b>BR19</b> <span class="tg yc">Yêu cầu</span> Kết quả khảo sát: mỗi lần gửi 1 dòng, dòng mới ở cuối; đúng 10 cột theo thứ tự: Id (tăng từ 1) · Thời gian bắt đầu (lúc mở phiếu) · Thời gian hoàn thành (lúc bấm Gửi) · Tên đơn vị của Anh/Chị (C1) · C2 · C3 · C4 · C5 · C6 · C7 (tiêu đề cột = nội dung câu). Thứ tự cột cố định theo mã, C7 luôn ở cột cuối. Ô câu chọn lưu nguyên nhãn đáp án. Thời gian dd/MM/yyyy HH:mm:ss, giờ Việt Nam (giả định). Bỏ cột Email, Tên và các câu cũ đã xóa khỏi phiếu. <span class="tg dx2">Đề xuất</span> Phạm vi xem theo quyền như Khảo sát cuộc đánh giá; hệ thống tự ghi nhận quá hạn không phải lần gửi → không có dòng. Phân trang như lưới CMS (10 / 20 / 50, mặc định 20). Nút <b>Xuất Excel</b> cho Admin / Quản lý Auditor / Auditor: file .xlsx đúng 10 cột như bảng (không thêm dòng tiêu đề), toàn bộ câu trả lời trong phạm vi xem, Id dạng số, thời gian là giá trị ngày giờ Excel định dạng dd/mm/yyyy hh:mm:ss; tên file Ket_qua_khao_sat_yyyyMMdd_HHmm.xlsx. Khung Thông tin tìm kiếm (v9.1): Tên báo cáo, Thời gian hoàn thành, Mức độ hài lòng (câu 2), Đơn vị được kiểm soát (chỉ Đơn vị cấp 2 – <span class="tg yc">Yêu cầu</span> v9.2), Auditor, Đơn vị kiểm soát; Xuất Excel theo đúng điều kiện đã Tìm kiếm.</li>
     </ol>
 
     <h4>Cần chốt</h4>
@@ -330,18 +603,27 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
       <li>Tính ngày lịch hay ngày làm việc; T7/CN có gửi nhắc không?</li>
       <li>Khi hệ thống tự ghi nhận, có gửi mail báo cho QLBP / QLĐV cấp 2 / Auditor không?</li>
       <li>Nguồn dữ liệu: QLBP và QLĐV cấp 2 (auditee) của từng đơn vị; Auditor ↔ đơn vị kiểm soát; Quản lý Auditor ↔ Auditor (cây tổ chức / phân quyền nào)?</li>
-      <li>"Admin" là nhóm quyền nào (FTQ)? QLĐV cấp 2 có cần màn riêng không, hay chỉ nhận mail CC?</li>
+      <li>"Admin" là nhóm quyền nào (FTQ)? QLĐV cấp 2 xem tại Khảo sát cuộc đánh giá (đang đề xuất) hay chỉ nhận mail CC? QLBP có cần thêm màn Khảo sát cuộc đánh giá không?</li>
       <li>QLBP chi nhánh đã có tài khoản FTEL CMS chưa, hay cần nhập trên MobiQC?</li>
-      <li>Báo cáo loại khác "Định kỳ" có sinh khảo sát không? Chọn mức 1–2 có bắt nhập lý do không?</li>
+      <li>Báo cáo loại khác "Định kỳ" có sinh khảo sát không?</li>
       <li>Xuất Excel: QLBP / QLĐV cấp 2 có cần xuất không? Có cần thêm sheet Nhật ký (mail, người nhập) không?</li>
+      <li><b>Phiếu thật</b> không yêu cầu đăng nhập, không lưu tên/email, gửi không giới hạn – ngược với BR06 (không đánh giá hộ, cần biết ai gửi) và BR08 (log người nhập). Prototype đang: QLBP đăng nhập CMS, mở phiếu từ dòng khảo sát; bảng Kết quả không có Tên/Email; màn theo dõi và Nhật ký vẫn ghi tài khoản. Giữ cách này hay mở phiếu không cần đăng nhập?</li>
+      <li>Gửi nhiều lần: kết quả của đơn vị (Mức độ hài lòng, Người nhập ở màn theo dõi, file Excel theo dõi) lấy lần gửi <b>gần nhất</b> (đang làm) hay lần đầu?</li>
+      <li>Tự ghi nhận quá hạn: câu 3–7 điền gì (đang để trống)? Có ghi thêm 1 dòng vào Kết quả khảo sát không (đang không)?</li>
+      <li>Kết quả khảo sát: phạm vi xem theo quyền như trên đã đúng chưa? Phiếu không hiện tên cuộc đánh giá (giống thật), CMS gắn câu trả lời vào dòng khảo sát qua nút/link mở phiếu – OK? Nút Xuất Excel 10 cột đã thêm theo góp ý "Xuất": QLĐV cấp 2 có cần xuất không? Phân trang đang mở trang 1 (Id nhỏ nhất), dòng mới ở trang cuối – giữ hay đảo Id giảm dần (mới nhất lên đầu)?</li>
+      <li>Chip lọc nhanh trên đầu danh sách và thanh nhắc việc cho QLBP (v8) có giữ không?</li>
+      <li><b>Số câu và nhánh</b> – <b>đã chốt 21/10</b>: anh Hieu gửi 2 bộ câu từ phiếu thật, khớp prototype – C2 = 5/4/3 → C1, C2, C3, C4, C5, C6, C7 (câu 7 là Góp ý, ô chữ); C2 = 2/1 → C1, C2, C7, C3, C4, C5, C6 (câu 7 là Thái độ, chọn đáp án).</li>
+      <li><b>Bộ lọc Kết quả khảo sát</b>: Tên báo cáo · Thời gian hoàn thành · Mức độ hài lòng (câu 2) · Đơn vị được kiểm soát (cấp 2) · Auditor · Đơn vị kiểm soát đã đủ chưa? Màn Khảo sát cuộc đánh giá có đổi ô Đơn vị được kiểm soát thành chỉ cấp 2 không (đang cấp 1 + cấp 2)? Có cần lọc theo câu 3–6 hoặc nội dung góp ý (câu 7) không? Thời gian mặc định để trống (tất cả) hay đầu tháng → hôm nay như màn theo dõi?</li>
+      <li><b>Câu 1 tự điền</b>: điền đúng mã Đơn vị cấp 2 trên Báo cáo dự thảo (VD "PDNI") hay tên đầy đủ của đơn vị? QLBP được sửa (đang cho sửa) hay khóa không cho sửa?</li>
     </ol>
 
     <h4>Dữ liệu mẫu</h4>
     <ul>
-      <li>12/17 dòng báo cáo lấy từ ảnh màn Báo cáo dự thảo (5 dòng bị che, không tự thêm).</li>
-      <li>Báo cáo 2026-047-BLU-T10 gửi 16/10 là giả lập, để có dòng đang trong hạn.</li>
+      <li>Báo cáo T09: 12/17 dòng lấy từ ảnh màn Báo cáo dự thảo (5 dòng bị che, không tự thêm).</li>
+      <li>Giả lập để có nhiều bản ghi (cùng các đơn vị trong ảnh, không gắn nhãn trên lưới): báo cáo T05–T08 gửi 05/06, 06/07, 05/08, 07/09 (đã hết hạn; khoảng 1/5 phiếu không nhập → tự ghi nhận; 2 dòng gửi 2 lần) và báo cáo T10 gửi 14–19/10 (số 047 → 051, đang trong hạn). Số lỗi / nhân sự / XLVP của báo cáo giả lập tính theo tỉ lệ từ T09. Nhãn "giả lập" chỉ gắn cho báo cáo sinh bằng nút ① trên bảng Prototype.</li>
       <li>Email QLBP (qlbp.&lt;mã đơn vị&gt;@fpt.com), QLĐV cấp 2 (qldv.&lt;mã đơn vị&gt;@fpt.com), Auditor (auditor.&lt;mã site&gt;@fpt.com), Quản lý Auditor (ql.&lt;đơn vị kiểm soát&gt;@fpt.com, gán theo Đơn vị kiểm soát của báo cáo), kết quả khảo sát, lịch sử mail: giả lập.</li>
-      <li>Giờ hệ thống giả lập bắt đầu 09:30 19/10/2026.</li>
+      <li>46 câu trả lời mẫu ở Kết quả khảo sát, theo các phiếu QLBP đã nhập: câu 1 = Đơn vị cấp 2 (giá trị tự điền); câu 2–7, góp ý, thời gian bắt đầu / hoàn thành là giả lập (5 phiếu T09 và phiếu PBLU T10 giữ như bản trước).</li>
+      <li>Giờ hệ thống giả lập bắt đầu 09:30 19/10/2026. Khi gửi phiếu, giờ giả lập cộng thêm thời gian điền thật (để có Thời gian bắt đầu / hoàn thành đến giây).</li>
     </ul>
 
     <h4>Lịch sử phiên bản</h4>
@@ -354,6 +636,14 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
       <li>v5.1: đầu lưới chỉ giữ số đếm theo trạng thái.</li>
       <li>v5.2: thêm Xuất Excel.</li>
       <li>v5.3: đổi tên cột QLBP (Auditee), QLĐV cấp 2 (Auditee), Auditor.</li>
+      <li>v6: module riêng KHẢO SÁT sau BÁO CÁO, gồm Khảo sát cuộc đánh giá + Nhập khảo sát; menu theo quyền; QLĐV cấp 2 xem tại Khảo sát cuộc đánh giá.</li>
+      <li>v7: phiếu nhập giống phiếu thật (7 câu, phân nhánh theo C2, hiện dần, đánh số theo vị trí, gửi không giới hạn, màn cảm ơn); màn mới Kết quả khảo sát (10 cột như file Excel kết quả).</li>
+      <li>v8: lớp giao diện giữ bố cục CMS (chip lọc nhanh, tag có icon, thước 5 nấc, chấm nhắc, avatar, nút biểu tượng, thanh nhắc việc QLBP, Kết quả có chấm màu, Nhật ký / Mail / 403 làm lại hiển thị).</li>
+      <li>v8.1: bỏ khung chú thích trên màn hình, chuyển vào Quy tắc · Cần chốt › Ghi chú màn hình.</li>
+      <li>v9: dữ liệu mẫu T05–T10 (nhiều bản ghi; Nhập khảo sát có phiếu Chưa khảo sát); Kết quả khảo sát có phân trang + Xuất Excel 10 cột.</li>
+      <li>v9.1: Kết quả khảo sát có khung Thông tin tìm kiếm (Xuất Excel theo điều kiện đã tìm); câu 1 tự điền Đơn vị cấp 2 của dòng báo cáo dự thảo.</li>
+      <li>v9.2: Kết quả khảo sát – Đơn vị được kiểm soát chỉ tìm theo Đơn vị cấp 2.</li>
+      <li>v9.3: đối chiếu xong số câu và nhánh với phiếu thật (khớp); Cần chốt 14 chuyển thành đã chốt.</li>
     </ul>
   </div>
 </aside>
@@ -379,6 +669,7 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   const D = s => new Date(s);
   const fD = d => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
   const fDT = d => d ? pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' ' + fD(d) : '';
+  const fDTS = d => d ? fD(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) : '';   // dd/MM/yyyy HH:mm:ss (Kết quả khảo sát)
   const day0 = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const pD = s => { const m = /^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/.exec(s || ''); if (!m) return null; const d = new Date(+m[3], +m[2] - 1, +m[1]); return d.getMonth() === +m[2] - 1 ? d : null; };
   const money = n => Number(n).toLocaleString('en-US');
@@ -394,7 +685,7 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   const qlAudOf = dvks => 'ql.' + String(dvks).toLowerCase().replace(/\s+/g, '') + '@fpt.com';      // dữ liệu mẫu (Quản lý Auditor theo Đơn vị kiểm soát)
   const siteOf = ten => { const m = /-([A-Z0-9]+)-T\d+$/.exec(ten || ''); return m ? m[1] : 'x'; };
   const auditorOf = ten => 'auditor.' + siteOf(ten).toLowerCase() + '@fpt.com';                   // dữ liệu mẫu
-  const defaultQ1 = s => [s.cap2, s.cap1].filter(Boolean).join(' - ');                             // BR11
+  const defaultQ1 = s => s.cap2 || s.cap1;     // câu 1 tự điền = Đơn vị cấp 2 của dòng báo cáo dự thảo (yêu cầu 21/10); không có cấp 2 → cấp 1 (Đề xuất)
   const scoreTxt = n => n + '-' + SCORE[n];
   const isAuditee = () => S.role === 'QLBP' || S.role === 'QLDV';
 
@@ -406,6 +697,36 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   const stOf = s => s.status;      // CHUA = Chưa khảo sát · DA = QLBP đã nhập · AUTO = hệ thống tự ghi nhận
   const leftTxt = n => n > 0 ? 'còn ' + n + ' ngày' : (n === 0 ? 'hôm nay là hạn cuối' : 'đã quá hạn');
 
+  /* ===== Phiếu khảo sát – giống phiếu thật đang phát hành, test 19/10/2026 (BR11, BR16–BR18) =====
+     Mã C1–C7 cố định để lưu dữ liệu. Sao chép đúng hành vi thật, không tự cải tiến phiếu. */
+  const HL = { 5: '5-Rất hài lòng', 4: '4-Hài lòng', 3: '3-Bình thường', 2: '2-Không hài lòng', 1: '1-Rất không hài lòng' };
+  const DY = { 5: '5-Đồng ý', 4: '4-Đồng ý một phần', 3: '3-Bình thường', 2: '2-Không hoàn toàn đồng ý', 1: '1-Không đồng ý' };
+  const QS = {
+    C1: { t: 'Tên Bộ phận & đơn vị của Anh/Chị (ví dụ: Phòng ... - Chi nhánh...)', type: 'text' },
+    C2: { t: 'Mức độ hài lòng chung của anh/chị về cuộc đánh giá?', type: 'choice', scale: HL, branch: true },
+    C3: { t: 'Thời gian đoàn đánh giá làm việc có phù hợp với đơn vị (Không rơi vào đầu/cuối tháng hoặc không ảnh hưởng tới công việc của đơn vị)', type: 'choice', scale: DY, branch: true },
+    C4: { t: 'Các tiêu chí đánh giá có phù hợp, sát với thực tế hoạt động đơn vị không?', type: 'choice', scale: DY, branch: true },
+    C5: { t: 'Báo cáo đánh giá hữu ích với đơn vị', type: 'choice', scale: DY, branch: true },
+    C6: { t: 'Thái độ làm việc và cách thức tương tác của đoàn đánh giá', type: 'choice', scale: HL },
+    C7: { t: 'Điều gì anh/chị thấy chưa phù hợp / cần cải thiện hoặc góp ý về cuộc đánh giá', type: 'text' }
+  };
+  const QCODES = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'];
+  const PATH_HI = QCODES;                                         // C2 = 5 / 4 / 3
+  const PATH_LO = ['C1', 'C2', 'C7', 'C3', 'C4', 'C5', 'C6'];     // C2 = 2 / 1: câu Góp ý lên vị trí 3
+  const pathOf = a => a.C2 == null ? ['C1', 'C2'] : (a.C2 <= 2 ? PATH_LO : PATH_HI);
+  const isAns = (a, c) => QS[c].type === 'text' ? String(a[c] == null ? '' : a[c]).trim() !== '' : a[c] != null;
+  // Hiện dần: C2–C5 có cấu hình nhánh → câu kế trên đường đi chỉ hiện khi câu này đã chọn; các câu khác không chặn (BR17)
+  function visibleQs(a) { const out = []; for (const c of pathOf(a)) { out.push(c); if (QS[c].branch && !isAns(a, c)) break; } return out; }
+  const ansTxt = (c, v) => v == null || v === '' ? '' : QS[c].type === 'choice' ? QS[c].scale[v] : String(v);
+  const blankAns = () => ({ C1: '', C2: null, C3: null, C4: null, C5: null, C6: null, C7: '' });
+  /* Kết quả khảo sát: đúng 10 cột, thứ tự cố định theo mã như file Excel kết quả của phiếu (BR19) */
+  const RES_COLS = [
+    { h: 'Id', w: 48 }, { h: 'Thời gian bắt đầu', w: 140 }, { h: 'Thời gian hoàn thành', w: 140 },
+    { h: 'Tên đơn vị của Anh/Chị', c: 'C1', w: 170 },
+    { h: QS.C2.t, c: 'C2', w: 150 }, { h: QS.C3.t, c: 'C3', w: 180 }, { h: QS.C4.t, c: 'C4', w: 175 },
+    { h: QS.C5.t, c: 'C5', w: 175 }, { h: QS.C6.t, c: 'C6', w: 160 }, { h: QS.C7.t, c: 'C7' }
+  ];
+
   /* ===== Icon ===== */
   const svg = (p, w) => '<svg width="' + (w || 14) + '" height="' + (w || 14) + '" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
   const IC = {
@@ -415,6 +736,7 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     bug: svg('<circle cx="8" cy="9" r="3.6"/><path d="M8 5.4V3.2M5.6 4l1.2 1.6M10.4 4 9.2 5.6M2.5 9h1.9M11.6 9h1.9M3.4 12.4l1.8-1M12.6 12.4l-1.8-1"/>'),
     clock: svg('<circle cx="8" cy="8" r="5.8"/><path d="M8 4.8V8l2.2 1.6"/>'),
     table: svg('<rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 6.3h12M2 9.6h12M6.5 3v10"/>'),
+    survey: svg('<rect x="3" y="2.6" width="10" height="11.8" rx="1"/><path d="M6 1.6h4v2H6z"/><path d="M5.6 8.8l1.7 1.7 3.2-3.3"/>'),
     edit: svg('<path d="M4 1.8h5.4l2.8 2.8v3.2"/><path d="M4 1.8v12.4h4"/><path d="M9.5 14.2h1.8l3.4-3.4-1.8-1.8-3.4 3.4z"/>'),
     eye: svg('<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>'),
     chev: svg('<path d="M4.5 6.2 8 9.7l3.5-3.5"/>', 12),
@@ -433,7 +755,18 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     last: svg('<path d="M12 3.5v9"/><path d="M4 3.5 9.5 8 4 12.5z" fill="currentColor" stroke="none"/>', 12),
     reload: svg('<path d="M13 8a5 5 0 1 1-1.5-3.6"/><path d="M13 2.8v2.6h-2.6"/>', 12),
     xls: svg('<rect x="2.5" y="1.8" width="11" height="12.4" rx="1"/><path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8"/>', 12),
-    flask: svg('<path d="M6 2h4M6.8 2v4L3 13.2c-.3.6.1 1.3.8 1.3h8.4c.7 0 1.1-.7.8-1.3L9.2 6V2"/>', 13)
+    flask: svg('<path d="M6 2h4M6.8 2v4L3 13.2c-.3.6.1 1.3.8 1.3h8.4c.7 0 1.1-.7.8-1.3L9.2 6V2"/>', 13),
+    search: svg('<circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.3 3.3"/>'),
+    okc: svg('<circle cx="8" cy="8" r="6"/><path d="m5.3 8.2 1.9 1.9 3.6-3.8"/>'),
+    clockS: svg('<circle cx="8" cy="8" r="5.8"/><path d="M8 4.8V8l2.2 1.6"/>', 12),
+    sys: svg('<circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v1.7M8 12.5v1.7M1.8 8h1.7M12.5 8h1.7M3.6 3.6l1.2 1.2M11.2 11.2l1.2 1.2M3.6 12.4l1.2-1.2M11.2 4.8l1.2-1.2"/>'),
+    bell: svg('<path d="M4 11.4V7.3a4 4 0 0 1 8 0v4.1l1.1 1.1H2.9z"/><path d="M6.6 13.7a1.5 1.5 0 0 0 2.8 0"/>'),
+    mail: svg('<rect x="2" y="3.5" width="12" height="9" rx="1"/><path d="m2.4 4.3 5.6 4.3 5.6-4.3"/>'),
+    plus: svg('<path d="M8 3v10M3 8h10"/>'),
+    lock: svg('<rect x="3.2" y="7" width="9.6" height="7" rx="1.2"/><path d="M5.2 7V5a2.8 2.8 0 0 1 5.6 0v2"/><path d="M8 9.8v1.6"/>'),
+    warn: svg('<path d="M8 2.2 14.3 13.4H1.7z"/><path d="M8 6.4v3.4M8 11.6v.1"/>'),
+    inbox: svg('<path d="M2 9.5 4 3.5h8l2 6v3.5H2z"/><path d="M2 9.5h3.5l1 1.6h3l1-1.6H14"/>'),
+    check: svg('<path d="m3.6 8.4 2.8 2.8 6-6.2"/>')
   };
 
   /* ===== Dữ liệu từ ảnh màn Báo cáo dự thảo (12/17 dòng nhìn thấy) =====
@@ -452,14 +785,15 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     ['Định kỳ PQC MN 2026-043-BLU-T09', 'PNCTNB', 'PBLU', 8, 3, 800000, '2026-10-05T09:05', 'PQC MN'],
     ['Định kỳ PQC MN 2026-043-CMU-T09', 'FTELBUTNB', 'CMU', 10, 7, 2200000, '2026-10-05T08:59', 'PQC MN']
   ];
-  /* Phiếu QLBP đã nhập (giả lập) cho báo cáo T09, theo Đơn vị cấp 2: [thời gian gửi phiếu, mức hài lòng].
+  /* Phiếu QLBP đã gửi (giả lập) cho báo cáo T09, theo Đơn vị cấp 2:
+     [thời gian bắt đầu, thời gian hoàn thành, C2, C3, C4, C5, C6, C7]; C1 = Đơn vị cấp 2 (giá trị tự điền ở câu 1).
      Các dòng còn lại quá hạn 10/10 → hệ thống tự ghi nhận lúc 00:00 11/10. */
   const SAMPLE_SUBMIT = {
-    V1HN04: ['2026-10-05T14:20', 5],
-    PBLU: ['2026-10-05T13:40', 5],
-    PDNI: ['2026-10-06T16:45', 2],
-    PKGG: ['2026-10-07T15:05', 4],
-    DNI: ['2026-10-08T09:12', 4]
+    V1HN04: ['2026-10-05T14:16:05', '2026-10-05T14:20:48', 5, 5, 4, 5, 5, 'Không'],
+    PBLU: ['2026-10-05T13:36:12', '2026-10-05T13:40:37', 5, 5, 5, 5, 5, '.'],
+    PDNI: ['2026-10-06T16:38:20', '2026-10-06T16:45:09', 2, 2, 3, 3, 3, 'Thời gian làm việc chưa phù hợp'],
+    PKGG: ['2026-10-07T15:01:44', '2026-10-07T15:05:30', 4, 4, 4, 5, 4, 'Không'],
+    DNI: ['2026-10-08T09:07:51', '2026-10-08T09:12:26', 4, 5, 4, 4, 4, 'Không có góp ý']
   };
   /* Bộ đơn vị dùng cho báo cáo giả lập (lấy lại cặp đơn vị có trong ảnh) */
   const SIM_SETS = [
@@ -468,31 +802,76 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     { site: 'HPG', dvks: 'PQC MB', rows: [['FTELBUTDDT', 'HPG', 14, 9, 1300000], ['TINTDDT', 'THPG', 11, 7, 1500000]] },
     { site: 'BLU', dvks: 'PQC MN', rows: [['FTELBUTNB', 'BLU', 9, 5, 1100000], ['PNCTNB', 'PBLU', 4, 2, 400000]] }
   ];
-  /* Báo cáo giả lập gửi 16/10 (đang trong hạn tới 21/10) */
-  const PRESIM = { set: 3, at: '2026-10-16T14:00', submit: { PBLU: ['2026-10-17T10:15', 4] } };
+  /* ===== Dữ liệu mẫu thêm (v9, giả lập) – để có nhiều bản ghi; dùng lại đúng các đơn vị trong ảnh =====
+     Báo cáo T05–T08 (lịch sử, đã hết hạn) + báo cáo T10 (đang trong hạn). Không gắn nhãn "giả lập" trên lưới. */
+  const SITES = {};      // site → { site, dvks, time (giờ gửi T09), num (số kế hoạch T09), rows: [[cấp 1, cấp 2, lỗi, nhân sự, XLVP]] }
+  RAW.forEach(x => {
+    if (!x[1] && !x[2]) return;
+    const k = siteOf(x[0]);
+    (SITES[k] = SITES[k] || { site: k, dvks: x[7], time: x[6].slice(11), num: +/2026-(\d+)-/.exec(x[0])[1], rows: [] }).rows.push([x[1], x[2], x[3], x[4], x[5]]);
+  });
+  const HIST = [[5, '2026-06-05'], [6, '2026-07-06'], [7, '2026-08-05'], [8, '2026-09-07']];   // [tháng KS, ngày gửi báo cáo]; số kế hoạch = số T09 − 7 × số tháng lùi
+  const HIST_SKIP = 0.2;                            // khoảng 1/5 phiếu lịch sử không nhập → hệ thống tự ghi nhận
+  const HIST_TWICE = [[7, 'PDNI'], [8, 'PKGG']];    // dòng lịch sử QLBP gửi phiếu 2 lần
+  /* Báo cáo T10 đang trong hạn: [site, thời gian gửi, phiếu QLBP đã gửi theo Đơn vị cấp 2 (cùng dạng SAMPLE_SUBMIT)] */
+  const CUR = [
+    ['DNI', '2026-10-14T09:10', { PDNI: ['2026-10-15T15:14:31', '2026-10-15T15:20:05', 3, 3, 4, 3, 4, 'Cần thông báo lịch làm việc sớm hơn'] }],
+    ['HPG', '2026-10-15T10:20', {}],
+    ['BLU', '2026-10-16T14:00', { PBLU: ['2026-10-17T10:11:03', '2026-10-17T10:15:40', 4, 4, 5, 4, 5, '.'] }],
+    ['KGG', '2026-10-16T15:40', {}],
+    ['CMU', '2026-10-19T08:45', {}]
+  ];
+  const C7_OK = ['.', 'Không', 'Không có góp ý', 'Không có', '.', 'Không có ý kiến'];
+  const C7_MID = ['Nên thông báo lịch làm việc sớm hơn', 'Một số tiêu chí chưa sát đặc thù chi nhánh', 'Báo cáo nên gửi sớm để đơn vị kịp khắc phục'];
+  const C7_LOW = ['Lịch đánh giá trùng thời gian chốt số liệu cuối tháng', 'Tiêu chí đánh giá chưa sát thực tế vận hành', 'Thời gian làm việc kéo dài, ảnh hưởng công việc của đơn vị'];
+  // Số giả lập ổn định: cùng hạt giống → mỗi lần mở / Đặt lại dữ liệu đều ra cùng dữ liệu
+  const rngOf = seed => () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const wPick = (R, pairs) => { let x = R(); for (const p of pairs) { x -= p[1]; if (x < 0) return p[0]; } return pairs[pairs.length - 1][0]; };
+  const scaleRow = (R, r, lo, hi) => { const f = lo + R() * (hi - lo), loi = Math.max(1, Math.round(r[2] * f));
+    return [r[0], r[1], loi, Math.min(loi, Math.max(1, Math.round(r[3] * f))), Math.round(r[4] * loi / r[2] / 1000) * 1000]; };
 
   /* ===== State ===== */
-  const UI = { ptMin: false, anno: true };
+  const UI = { ptMin: false, anno: true, open: {} };   // open: nhóm menu đang mở
   let S;
+  let F = null;      // phiếu đang mở: { sid, mode, a (câu trả lời C1–C7), start (giờ giả lập lúc mở), startReal }
 
   function defaultFilter(k) {
-    if (k === 'nk') return { st: '', from: '', to: '' };      // QLBP / QLĐV cấp 2: mặc định tất cả phiếu (BR13)
+    if (k === 'nk') return { st: '', from: '', to: '' };      // Nhập khảo sát (QLBP): mặc định tất cả phiếu (BR13)
+    if (k === 'kq') return { ten: '', sc: '', dv: '', aud: '', dvks: '', from: '', to: '' };   // Kết quả khảo sát: mặc định không giới hạn thời gian (Đề xuất)
     return { ten: '', dv: '', st: '', sc: '', dvks: '', aud: '', nn: '', from: '01/' + pad(S.now.getMonth() + 1) + '/' + S.now.getFullYear(), to: fD(S.now) };
   }
 
   function initData() {
     S = { now: D('2026-10-19T09:30'), role: 'ADMIN', user: ADMIN_USER, screen: 'khaosat',
-      reports: [], surveys: [], mails: [], rSeq: 0, kSeq: 0, mSeq: 0, simSeq: 46, simIdx: 0,
-      f: {}, page: { ks: 1, bc: 1, nk: 1 }, size: { ks: 20, bc: 20, nk: 20 } };
-    ['ks', 'bc', 'nk'].forEach(k => { S.f[k] = defaultFilter(k); });
-    RAW.forEach(x => createReport({ ten: x[0], cap1: x[1], cap2: x[2], loi: x[3], ns: x[4], xlvp: x[5], tgGui: D(x[6]), dvks: x[7], thang: '9/2026', sim: false }));
-    addSimReport(SIM_SETS[PRESIM.set], D(PRESIM.at));
-    const sub = s => (s.sim ? PRESIM.submit : SAMPLE_SUBMIT)[s.cap2];
-    // Phát lại job nhắc 08:00 từng ngày, trước thời điểm QLBP gửi phiếu
-    for (let t = new Date(2026, 9, 6, REMIND_HOUR); t <= S.now; t = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1, REMIND_HOUR)) {
-      S.surveys.forEach(s => { const x = sub(s); if ((!x || D(x[0]) > t) && isDue(s, t)) sendMail(s, 'AUTO', t); });
+      reports: [], surveys: [], mails: [], results: [], subBy: {}, rSeq: 0, kSeq: 0, mSeq: 0, resSeq: 0, simSeq: 46, simIdx: 0,
+      f: {}, page: { ks: 1, bc: 1, nk: 1, kq: 1 }, size: { ks: 20, bc: 20, nk: 20, kq: 20 } };
+    ['ks', 'bc', 'nk', 'kq'].forEach(k => { S.f[k] = defaultFilter(k); });
+    const SUBS = {};                                       // id dòng khảo sát → các lần QLBP gửi phiếu
+    const put = (s, x) => { (SUBS[s.id] = SUBS[s.id] || []).push(x); };
+    genSample(put);                                        // T05–T08 (giả lập)
+    RAW.forEach(x => {                                     // T09 (từ ảnh) + phiếu mẫu
+      const s = createReport({ ten: x[0], cap1: x[1], cap2: x[2], loi: x[3], ns: x[4], xlvp: x[5], tgGui: D(x[6]), dvks: x[7], thang: '9/2026', sim: false }).result.survey;
+      if (s && SAMPLE_SUBMIT[s.cap2]) put(s, SAMPLE_SUBMIT[s.cap2]);
+    });
+    const R = rngOf(20261021);
+    CUR.forEach(c => {                                     // T10 (giả lập), đang trong hạn – số kế hoạch 047 → 051
+      const st = SITES[c[0]];
+      addSimReport({ site: c[0], dvks: st.dvks, rows: st.rows.map(x => scaleRow(R, x, .5, 1.1)) }, D(c[1]), true).made.forEach(s => { if (c[2][s.cap2]) put(s, c[2][s.cap2]); });
+    });
+    // Phát lại job nhắc 08:00 từng ngày, trước lần gửi phiếu đầu tiên của dòng
+    const firstAt = s => SUBS[s.id] ? D(SUBS[s.id][0][1]) : null;
+    const t0 = day0(new Date(Math.min.apply(null, S.surveys.map(s => s.tgGui.getTime()))));
+    for (let t = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + 1, REMIND_HOUR); t <= S.now; t = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1, REMIND_HOUR)) {
+      S.surveys.forEach(s => { const f = firstAt(s); if ((!f || f > t) && isDue(s, t)) sendMail(s, 'AUTO', t); });
     }
-    S.surveys.forEach(s => { const x = sub(s); if (x) Object.assign(s, { status: 'DA', at: D(x[0]), score: x[1], q1: defaultQ1(s), by: s.qlbp, byRole: 'QLBP' }); });
+    // Các lần gửi → bảng Kết quả khảo sát (Id tăng theo thời gian hoàn thành); dòng theo dõi lấy lần gửi gần nhất
+    const res = [];
+    S.surveys.forEach(s => (SUBS[s.id] || []).forEach(x => res.push({ sid: s.id, start: D(x[0]), end: D(x[1]), a: { C1: defaultQ1(s), C2: x[2], C3: x[3], C4: x[4], C5: x[5], C6: x[6], C7: x[7] } })));
+    res.sort((p, q) => p.end - q.end).forEach(x => {
+      const s = getS(x.sid);
+      x.id = ++S.resSeq; S.subBy[x.id] = s.qlbp; S.results.push(x);
+      Object.assign(s, { status: 'DA', at: x.end, score: x.a.C2, q1: x.a.C1, by: s.qlbp, byRole: 'QLBP', subs: (s.subs || 0) + 1 });
+    });
     finalizeOverdue();
   }
 
@@ -503,10 +882,50 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     return { report: r, result: onDraftReportCreated(r) };
   }
 
-  function addSimReport(set, at) {
-    const ten = 'Định kỳ ' + set.dvks + ' 2026-' + pad3(++S.simSeq) + '-' + set.site + '-T10';
-    const res = set.rows.map(x => createReport({ ten, cap1: x[0], cap2: x[1], loi: x[2], ns: x[3], xlvp: x[4], tgGui: new Date(at), dvks: set.dvks, thang: '10/2026', sim: true }).result);
+  function addReportSet(set, at, ten, thang, sim) {
+    const res = set.rows.map(x => createReport({ ten, cap1: x[0], cap2: x[1], loi: x[2], ns: x[3], xlvp: x[4], tgGui: new Date(at), dvks: set.dvks, thang, sim }).result);
     return { ten, rows: set.rows.length, made: res.filter(r => r.survey).map(r => r.survey), skipped: res.filter(r => r.skipped).length };
+  }
+  // sample = true: dữ liệu mẫu T10 (không gắn nhãn) · không truyền: báo cáo sinh bằng nút ① trên bảng Prototype (nhãn "giả lập")
+  function addSimReport(set, at, sample) {
+    return addReportSet(set, at, 'Định kỳ ' + set.dvks + ' 2026-' + pad3(++S.simSeq) + '-' + set.site + '-T10', '10/2026', !sample);
+  }
+
+  // Báo cáo T05–T08 cho cùng các site; phiếu lịch sử: phần lớn QLBP đã gửi trong hạn, còn lại quá hạn → tự ghi nhận
+  function genSample(put) {
+    const R = rngOf(20261019);
+    HIST.forEach(h => Object.keys(SITES).forEach(k => {
+      const st = SITES[k], m = h[0];
+      const ten = 'Định kỳ ' + st.dvks + ' 2026-' + pad3(st.num - 7 * (9 - m)) + '-' + k + '-T' + pad(m);
+      addReportSet({ dvks: st.dvks, rows: st.rows.map(x => scaleRow(R, x, .6, 1.3)) }, D(h[1] + 'T' + st.time), ten, m + '/2026', false).made.forEach(s => {
+        const twice = HIST_TWICE.some(t => t[0] === m && t[1] === s.cap2);
+        if (!twice && R() < HIST_SKIP) return;
+        const e = fakeEntry(R, s); put(s, e);
+        if (twice) put(s, fakeEntry(R, s, e[1]));
+      });
+    }));
+  }
+
+  // Một lần QLBP gửi phiếu (giả lập): [bắt đầu, hoàn thành, C2, C3, C4, C5, C6, C7] – luôn trong hạn
+  function fakeEntry(R, s, after) {
+    const cl = v => Math.max(1, Math.min(5, v)), one = a => a[Math.floor(R() * a.length)];
+    const c2 = wPick(R, [[5, .38], [4, .36], [3, .14], [2, .08], [1, .04]]);
+    const near = () => cl(c2 + wPick(R, [[0, .6], [-1, .2], [1, .2]]));
+    const c3 = near(), c4 = near(), c5 = near(), c6 = cl(c2 + wPick(R, [[0, .6], [1, .3], [-1, .1]]));
+    const c7 = c2 <= 2 ? one(C7_LOW) : c2 === 3 && R() < .6 ? one(C7_MID) : one(C7_OK);
+    let end;
+    if (after) end = new Date(after.getTime() + DAY + (90 + Math.floor(R() * 120)) * 60000);     // gửi thêm: hôm sau
+    else {                                  // ngày 0–4 sau ngày gửi báo cáo, giờ hành chính, bỏ Chủ nhật, ≥ 40 phút sau khi nhận mail
+      const day = day0(s.tgGui); day.setDate(day.getDate() + wPick(R, [[0, .22], [1, .32], [2, .2], [3, .16], [4, .1]]));
+      if (day.getDay() === 0) day.setDate(day.getDate() + 1);
+      end = new Date(day.getTime() + (495 + Math.floor(R() * 570)) * 60000 + Math.floor(R() * 60000));
+      const min = s.tgGui.getTime() + 40 * 60000;
+      if (end.getTime() < min) end = new Date(min + Math.floor(R() * 7200000));
+    }
+    if (end > dueEnd(s)) end = new Date(dueEnd(s).getTime() - 3600000);
+    end.setMilliseconds(0);
+    const start = new Date(end.getTime() - (150 + Math.floor(R() * 420) + (c2 <= 2 ? 120 : 0)) * 1000);
+    return [start, end, c2, c3, c4, c5, c6, c7];
   }
 
   // TRIGGER: báo cáo dự thảo được sinh → sinh dòng khảo sát + mail To QLBP, CC QLĐV cấp 2 + Auditor (BR01, BR02, BR09, BR10)
@@ -528,6 +947,7 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   const getS = id => S.surveys.find(s => s.id === id);
   const ccOf = s => [s.qldv, s.auditor].filter(Boolean).join('; ');   // CC: QLĐV cấp 2 (auditee) + Auditor (BR02)
   const mailsOf = id => S.mails.filter(m => m.sid === id).sort((a, b) => (a.at - b.at) || a.id.localeCompare(b.id));
+  const resOf = s => S.results.filter(x => x.sid === s.id).sort((p, q) => p.id - q.id);     // các lần gửi phiếu của dòng khảo sát
 
   // type: TB = mail khảo sát · AUTO = nhắc tự động (ngày thứ 2/3/4)
   function sendMail(s, type, at) {
@@ -562,13 +982,13 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 
   // Nhật ký khảo sát: ai làm gì, lúc nào (BR08)
   function logOf(s) {
-    const ev = [{ at: s.tgGui, o: 0, ev: 'Sinh dòng khảo sát', who: 'Hệ thống', role: '—', detail: 'Từ báo cáo dự thảo ' + esc(s.ten) + ' · ' + esc(s.cap1) + ' / ' + esc(s.cap2) }];
-    mailsOf(s.id).forEach(m => ev.push({ at: m.at, o: 1,
+    const ev = [{ at: s.tgGui, o: 0, k: 'gen', ev: 'Sinh dòng khảo sát', who: 'Hệ thống', role: '—', detail: 'Từ báo cáo dự thảo ' + esc(s.ten) + ' · ' + esc(s.cap1) + ' / ' + esc(s.cap2) }];
+    mailsOf(s.id).forEach(m => ev.push({ at: m.at, o: 1, k: m.type === 'TB' ? 'mail' : 'rem',
       ev: m.type === 'TB' ? 'Gửi mail khảo sát' : 'Gửi mail nhắc lần ' + m.n + '/' + MAX_AUTO, who: 'Hệ thống', role: '—',
       detail: 'To ' + esc(m.to) + ' · CC ' + esc(m.cc) + ' · có cảnh báo tự ghi nhận · <a data-act="mailview" data-id="' + m.id + '">Xem mail</a>' }));
-    if (s.status === 'DA') ev.push({ at: s.at, o: 3, cls: 'ent', ev: '<b>Gửi phiếu khảo sát</b>', who: '<b>' + esc(s.by) + '</b>', role: 'QLBP (auditee)',
-      detail: 'Câu 1: ' + esc(s.q1) + ' · Câu 2: <b>' + scoreTxt(s.score) + '</b> · ngừng nhắc' });
-    if (s.status === 'AUTO') ev.push({ at: s.at, o: 3, cls: 'ent au', ev: '<b>Hệ thống tự ghi nhận</b>', who: '<b>Hệ thống</b>', role: 'Quy tắc quá hạn ' + DEADLINE_DAYS + ' ngày',
+    resOf(s).forEach((x, k) => ev.push({ at: x.end, o: 3, k: 'sub', cls: 'ent', ev: '<b>Gửi phiếu khảo sát</b>' + (k ? ' (lần ' + (k + 1) + ')' : ''), who: '<b>' + esc(S.subBy[x.id]) + '</b>', role: 'QLBP (auditee)',
+      detail: 'Kết quả khảo sát Id <b>' + x.id + '</b> · bắt đầu ' + fDTS(x.start) + ' · Câu 2: <b>' + scoreTxt(x.a.C2) + '</b>' + (x.a.C2 <= 2 ? ' · nhánh 2/1, câu Góp ý ở vị trí 3' : '') + (k ? '' : ' · ngừng nhắc') }));
+    if (s.status === 'AUTO') ev.push({ at: s.at, o: 3, k: 'auto', cls: 'ent au', ev: '<b>Hệ thống tự ghi nhận</b>', who: '<b>Hệ thống</b>', role: 'Quy tắc quá hạn ' + DEADLINE_DAYS + ' ngày',
       detail: 'Hết hạn ' + fD(dueDate(s)) + ', QLBP chưa nhập → ghi nhận <b>' + scoreTxt(AUTO_SCORE) + '</b> (mặc định) · khóa phiếu, không cho nhập' });
     return ev.sort((a, b) => (a.at - b.at) || (a.o - b.o));
   }
@@ -603,15 +1023,23 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   function setRole(v) {
     const p = String(v).split('|');
     S.role = p[0]; S.user = p[1];
-    if (isAuditee()) S.screen = 'nhapks';
-    else if (S.screen === 'nhapks') S.screen = 'khaosat';
-    resetFilters();
+    if (!can(S.screen)) S.screen = home();
+    resetOpen(); resetFilters();
     closeAll(); renderAll();
   }
   // Đổi người đăng nhập → bộ lọc về mặc định, giữ khoảng thời gian đang xem
   function resetFilters() {
-    ['ks', 'bc', 'nk'].forEach(k => { const keep = S.f[k]; S.f[k] = defaultFilter(k); S.f[k].from = keep.from; S.f[k].to = keep.to; S.page[k] = 1; });
+    ['ks', 'bc', 'nk', 'kq'].forEach(k => { const keep = S.f[k]; S.f[k] = defaultFilter(k); S.f[k].from = keep.from; S.f[k].to = keep.to; S.page[k] = 1; });
   }
+
+  /* ===== Quyền màn hình (BR07, BR15) – không có quyền: ẩn menu; mở link trực tiếp → 403 (Đề xuất) ===== */
+  const PERM = {
+    ADMIN: ['baocao', 'khaosat', 'ketqua'], QLAUD: ['baocao', 'khaosat', 'ketqua'], AUDITOR: ['baocao', 'khaosat', 'ketqua'],
+    QLBP: ['nhapks'],                // nhập phiếu của đơn vị mình (BR06)
+    QLDV: ['khaosat', 'ketqua']      // Đề xuất: chỉ xem, chỉ đơn vị mình
+  };
+  const can = k => (PERM[S.role] || []).indexOf(k) >= 0;
+  const home = () => can('khaosat') ? 'khaosat' : (PERM[S.role] || ['khaosat'])[0];
 
   /* ===== Phạm vi xem theo vai trò (BR07) ===== */
   function scope() {
@@ -629,11 +1057,11 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     const from = pD(f.from), to = pD(f.to), x = day0(d);
     return !(from && x < from) && !(to && x > to);
   }
-  function filterSurveys() {
+  function filterSurveys(anySt) {
     const f = S.f.ks;
     return scope().filter(s =>
       (!f.ten || s.ten === f.ten) && (!f.dv || s.cap1 === f.dv || s.cap2 === f.dv) && (!f.dvks || s.dvks === f.dvks) &&
-      (!f.aud || s.auditor === f.aud) && (!f.st || stOf(s) === f.st) && (!f.sc || String(s.score) === f.sc) &&
+      (!f.aud || s.auditor === f.aud) && (anySt || !f.st || stOf(s) === f.st) && (!f.sc || String(s.score) === f.sc) &&
       (!f.nn || s.byRole === f.nn) && inRange(s.tgGui, f)
     ).sort(byTime);
   }
@@ -650,7 +1078,7 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     const page = S.page[k], start = (page - 1) * size;
     return { page, size, pages, start, view: rows.slice(start, start + size) };
   }
-  const screenKey = () => S.screen === 'baocao' ? 'bc' : S.screen === 'nhapks' ? 'nk' : 'ks';
+  const screenKey = () => S.screen === 'baocao' ? 'bc' : S.screen === 'nhapks' ? 'nk' : S.screen === 'ketqua' ? 'kq' : 'ks';
   function applySearch() {
     const k = screenKey(), f = Object.assign({}, S.f[k]);
     $$('#view [data-f]').forEach(el => { f[el.dataset.f] = el.value.trim(); });
@@ -665,51 +1093,65 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     { t: 'KIỂM SOÁT', ic: 'bug' }, { t: 'GIẢI TRÌNH', ic: 'clock' },
     { t: 'BÁO CÁO', ic: 'table', sub: [
       { k: 'baocao', t: 'Báo cáo dự thảo' },
-      { k: 'khaosat', t: 'Khảo sát cuộc đánh giá', isNew: true },
       { k: 'x', t: 'Báo cáo điểm danh' }, { k: 'x', t: 'BC kiểm soát dịch vụ' }, { k: 'x', t: 'BC kiểm soát hạ tầng' },
       { k: 'x', t: 'BC hình ảnh kiểm soát' }, { k: 'x', t: 'Tracking QC' }
     ] },
+    { t: 'KHẢO SÁT', ic: 'survey', isNew: true, sub: [      // v6: module riêng, ngay sau BÁO CÁO (BR15)
+      { k: 'khaosat', t: 'Khảo sát cuộc đánh giá' },
+      { k: 'nhapks', t: 'Nhập khảo sát' },
+      { k: 'ketqua', t: 'Kết quả khảo sát' }       // v7 (BR19)
+    ] },
     { t: 'XỬ LÍ VI PHẠM', ic: 'doc' }, { t: 'DANH MỤC', ic: 'doc' }, { t: 'QUẢN TRỊ', ic: 'doc' }, { t: 'PHÂN QUYỀN MOBIQC', ic: 'doc' }
   ];
+  const SCR = { baocao: 'Báo cáo dự thảo', khaosat: 'Khảo sát cuộc đánh giá', nhapks: 'Nhập khảo sát', ketqua: 'Kết quả khảo sát' };
+  const groupOf = k => (MENU.find(m => m.sub && m.sub.some(x => x.k === k)) || {}).t || '';
+  const openFor = k => { const g = groupOf(k); if (g) UI.open[g] = true; };      // vào màn nào thì mở nhóm chứa màn đó
+  function resetOpen() { UI.open = {}; openFor(S.screen); if (isAuditee()) UI.open['KHẢO SÁT'] = true; }
+  function go(k) { S.screen = k; resetOpen(); closeAll(); renderAll(); window.scrollTo(0, 0); }   // đổi màn: chỉ mở nhóm chứa màn đó
+  function ghostTxt(k) {
+    if (k === 'ketqua') return 'Màn <b>Kết quả khảo sát</b> dành cho Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 (theo phạm vi). QLBP (auditee) xem câu trả lời của đơn vị mình bằng nút Xem ở Nhập khảo sát → hệ thống ẩn menu này (Đề xuất).';
+    return k === 'nhapks'
+      ? 'Màn <b>Nhập khảo sát</b> chỉ hiện với <b>QLBP (auditee)</b>, người duy nhất được nhập phiếu, không đánh giá hộ (BR06). ' + ROLE_TXT[S.role] + ' không có quyền → hệ thống ẩn menu này. Đổi vai trò trên bảng Prototype để xem.'
+      : 'Màn <b>Khảo sát cuộc đánh giá</b> dành cho Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 (theo phạm vi). QLBP (auditee) theo dõi phiếu của đơn vị mình ngay tại Nhập khảo sát → hệ thống ẩn menu này (Đề xuất).';
+  }
 
   function renderSide() {
     let h = '<div class="brand"><span class="lg">' + IC.logo + '</span>FTEL CMS<span class="bg">' + IC.burger + '</span></div><ul class="menu">';
-    if (isAuditee()) {
-      // QLBP / QLĐV cấp 2 (auditee): chỉ 1 menu khảo sát, không có BÁO CÁO (BR07)
-      const qlbp = S.role === 'QLBP';
-      const pend = qlbp ? scope().filter(s => s.status === 'CHUA').length : 0;
-      h += '<li class="mi' + (S.screen === 'nhapks' ? ' active' : '') + '" data-act="nav" data-k="nhapks"><span class="ico">' + (qlbp ? IC.edit : IC.eye) + '</span><span>' + (qlbp ? 'NHẬP KHẢO SÁT' : 'KHẢO SÁT ĐƠN VỊ') + '</span>' +
-        (pend ? '<span class="cnt" title="Phiếu cần khảo sát">' + pend + '</span>' : '') + '</li></ul>' +
-        '<div class="side-note">' + (qlbp ? 'QLBP (auditee) chỉ có menu Nhập khảo sát, không xem được báo cáo (BR07).' : 'QLĐV cấp 2 (auditee) chỉ xem khảo sát của đơn vị mình; không nhập, không xem báo cáo (BR07).') + '</div>';
-      $('#side').innerHTML = h;
-      return;
-    }
-    MENU.forEach(m => {
-      h += '<li class="mi' + (m.sub ? ' open' : '') + '" data-act="' + (m.sub ? 'noop' : 'oos') + '"><span class="ico">' + IC[m.ic] + '</span><span>' + m.t + '</span><span class="cv">' + (m.sub ? IC.up : IC.chev) + '</span></li>';
-      if (m.sub) {
-        h += '<ul class="sub">' + m.sub.map(x => {
-          const live = x.k === 'baocao' || x.k === 'khaosat';
-          return '<li class="si' + (S.screen === x.k ? ' active' : '') + '" data-act="' + (live ? 'nav' : 'oos') + '" data-k="' + x.k + '"><span class="t">' + x.t + '</span>' + (x.isNew ? '<span class="tag-new">Mới</span>' : '') + '</li>';
-        }).join('') + '</ul>';
-      }
+    // QLBP / QLĐV cấp 2 (auditee): chỉ module KHẢO SÁT, không có BÁO CÁO (BR07)
+    (isAuditee() ? MENU.filter(m => m.t === 'KHẢO SÁT') : MENU).forEach(m => {
+      if (!m.sub) { h += '<li class="mi" data-act="oos"><span class="ico">' + IC[m.ic] + '</span><span>' + m.t + '</span><span class="cv">' + IC.chev + '</span></li>'; return; }
+      const open = !!UI.open[m.t], sel = m.sub.some(x => x.k === S.screen);
+      h += '<li class="mi' + (open ? ' open' : '') + (sel ? ' grpsel' : '') + '" data-act="grp" data-g="' + esc(m.t) + '"><span class="ico">' + IC[m.ic] + '</span><span>' + m.t + '</span>' +
+        (m.isNew ? '<span class="tag-new">Mới</span>' : '') + '<span class="cv">' + (open ? IC.up : IC.chev) + '</span></li>';
+      if (!open) return;
+      h += '<ul class="sub">' + m.sub.map(x => {
+        if (!SCR[x.k]) return '<li class="si" data-act="oos"><span class="t">' + x.t + '</span></li>';     // màn hiện có, ngoài phạm vi prototype
+        if (!can(x.k)) return '<li class="si ghost" data-act="ghost" data-k="' + x.k + '" title="Vai trò hiện tại không có quyền → hệ thống ẩn menu này. Prototype chỉ hiện mờ khi bật Chú thích."><span class="t">' + x.t + '</span><span class="tag-hide">Ẩn</span></li>';
+        const pend = x.k === 'nhapks' ? scope().filter(s => s.status === 'CHUA').length : 0;
+        return '<li class="si' + (S.screen === x.k ? ' active' : '') + '" data-act="nav" data-k="' + x.k + '"><span class="t">' + x.t + '</span>' +
+          (pend ? '<span class="cnt" title="Phiếu cần khảo sát">' + pend + '</span>' : '') + '</li>';
+      }).join('') + '</ul>';
     });
-    $('#side').innerHTML = h + '</ul>';
+    h += '</ul>';
+    $('#side').innerHTML = h;
   }
 
   function renderTop() {
-    let crumb;
-    if (isAuditee()) crumb = 'Trang chủ<span class="sep">/</span><span class="cur">' + (S.screen !== 'nhapks' ? 'Không có quyền truy cập' : S.role === 'QLBP' ? 'Nhập khảo sát' : 'Khảo sát đơn vị') + '</span>';
-    else crumb = 'Trang chủ<span class="sep">/</span>BÁO CÁO<span class="sep">/</span><span class="cur">' + (S.screen === 'baocao' ? 'Báo cáo dự thảo' : 'Khảo sát cuộc đánh giá') + '</span>';
+    const crumb = 'Trang chủ<span class="sep">/</span>' + (can(S.screen)
+      ? groupOf(S.screen) + '<span class="sep">/</span><span class="cur">' + SCR[S.screen] + '</span>'
+      : '<span class="cur">Không có quyền truy cập</span>');
     $('#top').innerHTML = '<div class="crumb">' + crumb + '</div>' +
       '<div class="rt"><span title="Thông báo">' + IC.mega + '</span><span title="Hướng dẫn">' + IC.help + '</span><span class="usr">' + IC.user + esc(S.user) + '<span class="rl">' + ROLE_TXT[S.role] + '</span></span></div>';
   }
 
   function renderProto() {
-    const opt = (role, e, label) => '<option value="' + role + '|' + esc(e) + '"' + (S.role === role && S.user === e ? ' selected' : '') + '>' + label + ' · ' + esc(e) + '</option>';
+    const pend = e => S.surveys.filter(s => s.qlbp === e && s.status === 'CHUA').length;      // QLBP: số phiếu chưa nhập – dễ chọn khi kiểm thử
+    const opt = (role, e, label) => '<option value="' + role + '|' + esc(e) + '"' + (S.role === role && S.user === e ? ' selected' : '') + '>' + label + ' · ' + esc(e) +
+      (role === 'QLBP' && pend(e) ? ' · ' + pend(e) + ' chưa nhập' : '') + '</option>';
     const grp = (label, role, list, short) => '<optgroup label="' + label + '">' + list.map(e => opt(role, e, short)).join('') + '</optgroup>';
     const el = $('#proto');
     el.innerHTML =
-      '<div class="pt-h" data-act="ptog">' + IC.flask + 'PROTOTYPE v5.3<span class="mm">' + (UI.ptMin ? '▴' : '▾') + '</span></div>' +
+      '<div class="pt-h" data-act="ptog">' + IC.flask + 'PROTOTYPE v9.3<span class="mm">' + (UI.ptMin ? '▴' : '▾') + '</span></div>' +
       '<div class="pt-b">' +
         '<div class="pt-clk">Giờ giả lập: <b>' + fDT(S.now) + '</b></div>' +
         '<div class="pt-l">Vai trò đăng nhập</div>' +
@@ -754,87 +1196,112 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
       '<span class="pi" data-act="reload" title="Tải lại">' + IC.reload + '</span>' +
       '<span class="info">Hiển thị từ ' + from + ' đến ' + to + ' trên tổng số ' + total + ' bản ghi</span></div>';
   }
+  /* --- Thành phần hiển thị v8 (chuẩn giao diện: màu luôn kèm icon + chữ) --- */
+  const ST = { CHUA: { t: 'Chưa khảo sát', c: 'wa', ic: 'clockS' }, DA: { t: 'Đã khảo sát', c: 'ok', ic: 'okc' }, AUTO: { t: 'Tự ghi nhận', c: 'sy', ic: 'sys' } };
+  const tagHTML = (c, ic, t, tip) => '<span class="tag ' + c + '"' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + IC[ic] + esc(t) + '</span>';
+  const addr = (e, to) => '<span class="addr' + (to ? ' to' : '') + '" title="' + esc(e) + '">' + esc(e) + '</span>';
+  const initials = e => acc(e).split(/[._-]/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
   function badge(s) {
-    if (s.status === 'DA') return '<span class="bdg d">Đã khảo sát</span>';
-    if (s.status === 'AUTO') return '<span class="bdg a" title="Quá hạn ' + DEADLINE_DAYS + ' ngày, QLBP chưa nhập → hệ thống tự ghi nhận ' + scoreTxt(AUTO_SCORE) + '">Tự ghi nhận</span>';
-    return '<span class="bdg w">Chưa khảo sát</span>';
+    const m = ST[s.status];
+    return tagHTML(m.c, m.ic, m.t, s.status === 'AUTO' ? 'Quá hạn ' + DEADLINE_DAYS + ' ngày, QLBP chưa nhập → hệ thống tự ghi nhận ' + scoreTxt(AUTO_SCORE) : '');
   }
+  // Hạn: chỉ dòng Chưa khảo sát có pill mức gấp – còn ≥ 3 ngày xám · 1–2 ngày cam · hôm nay đỏ
   function dueHTML(s) {
     const d = fD(dueDate(s));
     if (s.status !== 'CHUA') return d;
-    const n = daysLeftAt(s, S.now);
-    return '<span' + (n === 0 ? ' class="org"' : '') + '>' + d + '</span><span class="sub-n">' + (n === 0 ? 'hôm nay' : 'còn ' + n + ' ngày') + '</span>';
+    const n = daysLeftAt(s, S.now), c = n <= 0 ? 'cr' : n <= 2 ? 'wa' : 'nu';
+    return '<span class="due">' + d + '<span class="pill ' + c + '">' + IC.clockS + (n <= 0 ? 'hôm nay' : 'còn ' + n + ' ngày') + '</span></span>';
   }
+  // Số lần nhắc: 3 chấm (ngày thứ 2, 3, 4), chấm cam = đã gửi
+  const remindHTML = s => '<span class="rd" title="Đã nhắc ' + s.auto + '/' + MAX_AUTO + ' lần">' + REMIND_DAYS.map((x, i) => '<i' + (i < s.auto ? ' class="on"' : '') + '></i>').join('') + '</span><span class="rdn">' + s.auto + '/' + MAX_AUTO + '</span>';
   function whoHTML(s) {
-    if (s.status === 'DA') return accHTML(s.by) + '<span class="sub-n">QLBP</span>';
-    if (s.status === 'AUTO') return 'Hệ thống<span class="tag-auto">Tự ghi nhận</span>';
+    if (s.status === 'DA') return '<span class="who"><span class="av" aria-hidden="true">' + esc(initials(s.by)) + '</span>' + accHTML(s.by) + '<span class="sub-n">QLBP' + (s.subs > 1 ? ' · ' + s.subs + ' lần' : '') + '</span></span>';
+    if (s.status === 'AUTO') return '<span class="who"><span class="av sy" aria-hidden="true">' + IC.sys + '</span>Hệ thống<span class="sub-n">tự ghi nhận</span></span>';
     return '<span class="mu">—</span>';
   }
-  const scoreHTML = s => s.score ? '<span class="sc s' + s.score + '"><i></i>' + scoreTxt(s.score) + '</span>' + (s.status === 'AUTO' ? '<span class="sub-n">mặc định</span>' : '') : '<span class="mu">—</span>';
+  // Mức độ hài lòng: thước 5 nấc + nhãn đầy đủ; tự ghi nhận = nấc nhạt + icon hệ thống
+  const meterHTML = n => '<span class="mt" aria-hidden="true">' + [1, 2, 3, 4, 5].map(i => '<i' + (i <= n ? ' class="f"' : '') + '></i>').join('') + '</span>';
+  const scoreHTML = s => s.score ? '<span class="sc2 s' + s.score + (s.status === 'AUTO' ? ' au' : '') + '" title="' + (s.status === 'AUTO' ? 'Mặc định – hệ thống tự ghi nhận' : 'Câu 2 – lần gửi gần nhất') + '">' + meterHTML(s.score) + '<span>' + scoreTxt(s.score) + '</span>' +
+    (s.status === 'AUTO' ? '<span class="au-ic">' + IC.sys + '</span>' : '') + '</span>' : '<span class="mu">—</span>';
+  // Chip đếm theo trạng thái (BR12: chỉ số đếm) – bấm để lọc nhanh, bấm lại để bỏ lọc (Đề xuất)
+  function chipsHTML(k, base, order) {
+    const cur = S.f[k].st;
+    return '<span class="chips">' + order.map(o => '<button type="button" class="chip ' + ST[o[0]].c + (cur === o[0] ? ' on' : '') + '" data-act="chip" data-k="' + k + '" data-st="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '" title="' + (cur === o[0] ? 'Bỏ lọc' : 'Lọc nhanh: ' + o[1]) + '"><i></i>' + o[1] + ' <b>' + base.filter(x => x.status === o[0]).length + '</b></button>').join('') + '</span>';
+  }
+  const emptyRow = (cols, t) => '<tr><td colspan="' + cols + '" class="empty"><div class="es">' + IC.inbox + '<div>' + t + '</div></div></td></tr>';
 
   /* ===== Render: màn hình ===== */
   function renderAll() { finalizeOverdue(); renderSide(); renderTop(); renderScreen(); renderProto(); document.body.classList.toggle('noanno', !UI.anno); }
   function renderScreen() {
     const v = $('#view');
-    if (isAuditee() && S.screen !== 'nhapks') { v.innerHTML = view403(); return; }   // BR07
-    if (!isAuditee() && S.screen === 'nhapks') S.screen = 'khaosat';
-    v.innerHTML = S.screen === 'baocao' ? viewBaoCao() : S.screen === 'nhapks' ? viewAuditee() : viewKhaoSat();
+    if (!can(S.screen)) { v.innerHTML = view403(); return; }   // BR07, BR15: không có quyền → 403
+    v.innerHTML = S.screen === 'baocao' ? viewBaoCao() : S.screen === 'nhapks' ? viewAuditee() : S.screen === 'ketqua' ? viewKetQua() : viewKhaoSat();
     renderList();
   }
-  function renderList() { if (S.screen === 'baocao') listBaoCao(); else if (S.screen === 'nhapks') listAuditee(); else listKhaoSat(); }
+  function renderList() { if (S.screen === 'baocao') listBaoCao(); else if (S.screen === 'nhapks') listAuditee(); else if (S.screen === 'ketqua') listKetQua(); else listKhaoSat(); }
 
   function view403() {
-    return '<section class="panel"><div class="e403"><div class="big">403</div><b>Không có quyền truy cập</b><br>Tài khoản ' + ROLE_TXT[S.role] + ' không xem được báo cáo, chỉ xem khảo sát của đơn vị mình.<br><br>' +
-      '<button class="btn pri" data-act="nav" data-k="nhapks">Về màn ' + (S.role === 'QLBP' ? 'Nhập khảo sát' : 'Khảo sát đơn vị') + '</button></div></section>';
+    const why = S.screen === 'baocao' ? 'không xem được báo cáo'
+      : S.screen === 'nhapks' ? 'không có quyền nhập khảo sát: chỉ QLBP (auditee) của đơn vị được nhập phiếu'
+      : S.screen === 'ketqua' ? 'không có màn Kết quả khảo sát: xem câu trả lời của đơn vị mình bằng nút Xem tại KHẢO SÁT › Nhập khảo sát'
+      : 'không có màn Khảo sát cuộc đánh giá: theo dõi phiếu của đơn vị mình tại KHẢO SÁT › Nhập khảo sát';
+    return '<section class="panel"><div class="e403 result"><div class="r-ic">' + IC.lock + '</div><div class="r-code">403</div><div class="r-t">Không có quyền truy cập</div>' +
+      '<div class="r-s">Tài khoản ' + ROLE_TXT[S.role] + ' ' + why + '.</div>' +
+      '<button class="btn pri" data-act="nav" data-k="' + home() + '">Về màn ' + SCR[home()] + '</button></div></section>';
   }
 
-  /* --- Màn auditee: QLBP nhập · QLĐV cấp 2 xem (BR06, BR07) --- */
+  /* --- KHẢO SÁT › Nhập khảo sát: QLBP (auditee) nhập phiếu của đơn vị mình (BR06, BR07) --- */
   function viewAuditee() {
     const f = S.f.nk, mine = scope(), qlbp = S.role === 'QLBP';
     const units = uniq(mine.map(s => (s.cap2 || s.cap1) + (s.cap1 && s.cap2 ? ' (' + s.cap1 + ')' : ''))).join(', ');
-    const anno = qlbp
-      ? '<b>Vai trò QLBP (auditee)</b> (' + esc(S.user) + '): chỉ có menu Nhập khảo sát, không xem được báo cáo; chỉ phiếu của đơn vị mình. Nhập trước hạn; quá hạn chưa nhập → hệ thống tự ghi nhận "5-Rất hài lòng", không nhập được nữa.'
-      : '<b>Vai trò QLĐV cấp 2 (auditee)</b> (' + esc(S.user) + '): chỉ xem khảo sát của đơn vị mình; không nhập (không đánh giá hộ), không xem báo cáo.';
-    return '<div class="anno">' + IC.info + '<div>' + anno + ' <span class="lk" data-act="nav" data-k="baocao">Thử mở Báo cáo dự thảo</span> · <span class="lk" data-act="notes">BR05–BR07</span></div></div>' +
+    return todoAlert(mine, qlbp) +
       '<section class="panel"><div class="panel-h">Thông tin tìm kiếm</div><div class="panel-b">' +
         '<div class="lgd">Tìm kiếm</div><div class="fgrid">' +
           fld('Thời gian gửi khảo sát', rngHTML(f)) +
           fld('Trạng thái khảo sát', selHTML('st', 'Chọn để tìm kiếm', optPairs(ST_OPTS, f.st), f.st)) + '<div class="fld"></div>' +
-        '</div><div class="btn-row"><button class="btn pri" data-act="search">Tìm kiếm</button></div>' +
+        '</div><div class="btn-row"><button class="btn pri" data-act="search">' + IC.search + 'Tìm kiếm</button></div>' +
       '</div></section>' +
       '<section class="panel"><div class="panel-h">Phiếu khảo sát của đơn vị ' + esc(units || '—') + '<span class="sum" id="sum"></span></div><div id="list"></div></section>';
   }
 
+  // QLBP: thanh nhắc việc ngay đầu màn – số phiếu cần khảo sát, hạn gần nhất, nút Khảo sát ngay (Đề xuất)
+  function todoAlert(mine, qlbp) {
+    const todo = qlbp ? mine.filter(s => s.status === 'CHUA').sort((a, b) => dueDate(a) - dueDate(b)) : [];
+    if (!todo.length) return '';
+    const t = todo[0], n = daysLeftAt(t, S.now);
+    return '<div class="alert ' + (n <= 1 ? 'cr' : 'wa') + '" role="status">' + IC.bell + '<div>Anh/Chị có <b>' + todo.length + '</b> phiếu cần khảo sát · hạn gần nhất <b>' + fD(dueDate(t)) + '</b> (' + leftTxt(n) + '). Quá hạn chưa nhập, hệ thống tự ghi nhận "' + scoreTxt(AUTO_SCORE) + '" và không nhập được nữa.</div>' +
+      '<button class="btn pri sm" data-act="survey" data-id="' + t.id + '">' + IC.edit + 'Khảo sát ngay</button></div>';
+  }
+
   function listAuditee() {
     const f = S.f.nk, qlbp = S.role === 'QLBP';
-    const rows = scope().filter(s => (!f.st || stOf(s) === f.st) && inRange(s.tgGui, f)).sort(byTime), p = paginate('nk', rows);
-    const pend = rows.filter(s => s.status === 'CHUA').length, done = rows.filter(s => s.status === 'DA').length, auto = rows.filter(s => s.status === 'AUTO').length;
-    $('#sum').innerHTML = (qlbp ? 'Cần khảo sát' : 'Chưa khảo sát') + ' <b class="' + (pend ? 'red' : '') + '">' + pend + '</b> · Đã khảo sát <b>' + done + '</b> · Tự ghi nhận <b>' + auto + '</b>';
-    const act = s => s.status === 'CHUA'
-      ? (qlbp ? '<button class="btn pri sm" data-act="survey" data-id="' + s.id + '">Khảo sát</button>' : '<span class="mu">—</span>')
-      : '<button class="btn sm" data-act="view" data-id="' + s.id + '">Xem</button>';
+    const base = scope().filter(s => inRange(s.tgGui, f)).sort(byTime);
+    const rows = base.filter(s => !f.st || stOf(s) === f.st), p = paginate('nk', rows);
+    $('#sum').innerHTML = chipsHTML('nk', base, [['CHUA', qlbp ? 'Cần khảo sát' : 'Chưa khảo sát'], ['DA', 'Đã khảo sát'], ['AUTO', 'Tự ghi nhận']]);
+    // Phiếu thật cho gửi không giới hạn số lần → còn hạn thì QLBP gửi thêm được (BR18 · Đề xuất)
+    const act = s => {
+      if (s.status === 'CHUA') return qlbp ? '<button class="btn pri sm" data-act="survey" data-id="' + s.id + '">' + IC.edit + 'Khảo sát</button>' : '<span class="mu">—</span>';
+      const more = qlbp && s.status === 'DA' && S.now <= dueEnd(s);
+      return '<span class="acts"><button class="btn sm" data-act="view" data-id="' + s.id + '">' + IC.eye + 'Xem</button>' +
+        (more ? '<button class="btn sm" data-act="survey" data-id="' + s.id + '" title="Gửi thêm một câu trả lời">' + IC.plus + 'Gửi thêm</button>' : '') + '</span>';
+    };
     const body = p.view.map((s, i) =>
-      '<tr><td class="i">' + (p.start + i + 1) + '</td><td>' + esc(s.ten) + (s.sim ? '<span class="gl">giả lập</span>' : '') + '</td>' +
+      '<tr' + (qlbp && s.status === 'CHUA' ? ' class="todo"' : '') + '><td class="i">' + (p.start + i + 1) + '</td><td>' + esc(s.ten) + (s.sim ? '<span class="gl">giả lập</span>' : '') + '</td>' +
       '<td class="c">' + esc(s.thang) + '</td><td>' + esc(s.dvks) + '</td><td>' + esc(s.cap1) + '</td><td>' + esc(s.cap2) + '</td>' +
       '<td class="c">' + fDT(s.tgGui) + '</td><td class="c">' + dueHTML(s) + '</td><td class="c">' + badge(s) + '</td><td>' + scoreHTML(s) + '</td>' +
       '<td>' + whoHTML(s) + '</td><td class="c">' + (s.at ? fDT(s.at) : '<span class="mu">—</span>') + '</td><td class="c">' + act(s) + '</td></tr>').join('');
-    $('#list').innerHTML = '<div class="gwrap"><table class="grid"><thead><tr>' +
+    $('#list').innerHTML = '<div class="gwrap"><table class="grid nx"><thead><tr>' +
       '<th class="i"></th><th>Cuộc đánh giá</th><th class="c">Tháng KS</th><th>Đơn vị kiểm soát</th><th>Đơn vị cấp 1</th><th>Đơn vị cấp 2</th>' +
       '<th class="c">Thời gian gửi</th><th class="c">Hạn khảo sát</th><th class="c">Trạng thái</th><th>Mức độ hài lòng</th><th>Người nhập</th><th class="c">Thời gian nhập</th><th class="c">Thao tác</th>' +
-      '</tr></thead><tbody>' + (body || '<tr><td colspan="13" class="empty">Không có phiếu khảo sát</td></tr>') + '</tbody></table></div>' +
+      '</tr></thead><tbody>' + (body || emptyRow(13, 'Không có phiếu khảo sát')) + '</tbody></table></div>' +
       pagerHTML('nk', rows.length, p.page, p.size, p.pages);
   }
 
-  /* --- Màn Admin / Quản lý Auditor / Auditor: Khảo sát cuộc đánh giá (chỉ xem) --- */
+  /* --- KHẢO SÁT › Khảo sát cuộc đánh giá (chỉ xem, theo phạm vi): Admin / Quản lý Auditor / Auditor / QLĐV cấp 2 --- */
   function viewKhaoSat() {
     const f = S.f.ks, sc = scope().sort(byTime);
-    let anno;
-    if (S.role === 'QLAUD') anno = '<b>Vai trò Quản lý Auditor</b> (' + esc(S.user) + '): xem khảo sát của tất cả đơn vị do các Auditor mình quản lý phụ trách (' + uniq(sc.map(s => acc(s.auditor))).sort().join(', ') + '). Chỉ xem.';
-    else if (S.role === 'AUDITOR') anno = '<b>Vai trò Auditor</b> (' + esc(S.user) + '): chỉ xem khảo sát của đơn vị mình kiểm soát. Không nhập, không đánh giá hộ.';
-    else anno = '<b>Màn mới</b> · BÁO CÁO › Khảo sát cuộc đánh giá, ngay dưới Báo cáo dự thảo. <b>Admin</b> xem tất cả; Quản lý Auditor / Auditor xem theo phạm vi; QLBP auditee nhập ở màn riêng; <b>không cho đánh giá hộ</b>. Quá hạn 5 ngày chưa nhập → hệ thống <b>tự ghi nhận "5-Rất hài lòng"</b>, khóa phiếu; mail khảo sát có cảnh báo.';
     const scOpts = optPairs([5, 4, 3, 2, 1].map(n => [n, scoreTxt(n)]), f.sc);
-    return '<div class="anno">' + IC.info + '<div>' + anno + ' <span class="lk" data-act="notes">Quy tắc &amp; câu hỏi cần chốt</span></div></div>' +
-      '<section class="panel"><div class="panel-h">Thông tin kế hoạch kiểm soát</div><div class="panel-b">' +
+    return '<section class="panel"><div class="panel-h">Thông tin kế hoạch kiểm soát</div><div class="panel-b">' +
         '<div class="lgd">Tìm kiếm</div><div class="fgrid">' +
           fld('Tên báo cáo', selHTML('ten', 'Chọn để tìm kiếm', optList(uniq(sc.map(s => s.ten)), f.ten), f.ten)) +
           fld('Thời gian báo cáo', rngHTML(f)) +
@@ -844,44 +1311,90 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
           fld('Đơn vị kiểm soát', selHTML('dvks', 'Chọn để tìm kiếm', optList(uniq(sc.map(s => s.dvks)).sort(), f.dvks), f.dvks)) +
           fld('Mức độ hài lòng', selHTML('sc', 'Chọn để tìm kiếm', scOpts, f.sc)) +
           fld('Người nhập', selHTML('nn', 'Chọn để tìm kiếm', optPairs([['QLBP', 'QLBP nhập'], ['SYSTEM', 'Hệ thống tự ghi nhận']], f.nn), f.nn)) +
-        '</div><div class="btn-row"><button class="btn pri" data-act="search">Tìm kiếm</button> <button class="btn xl" data-act="export" title="Xuất danh sách đang hiển thị ra Excel (.xlsx)">' + IC.xls + 'Xuất Excel</button></div>' +
+        '</div><div class="btn-row"><button class="btn pri" data-act="search">' + IC.search + 'Tìm kiếm</button>' +
+          (S.role === 'QLDV' ? '' : ' <button class="btn xl" data-act="export" title="Xuất danh sách đang hiển thị ra Excel (.xlsx)">' + IC.xls + 'Xuất Excel</button>') + '</div>' +
       '</div></section>' +
       '<section class="panel"><div class="panel-h">Danh sách khảo sát<span class="sum" id="sum"></span></div><div id="list"></div></section>';
   }
 
   function actions(s) {
-    const main = s.status === 'CHUA' ? '<span class="mu" style="padding:0 8px">—</span>' : '<button class="btn sm" data-act="view" data-id="' + s.id + '">Xem</button>';
-    return '<span class="acts">' + main + '<button class="btn sm ic" data-act="log" data-id="' + s.id + '" title="Nhật ký khảo sát">' + IC.hist + '</button></span>';
+    const view = s.status === 'CHUA'
+      ? '<button type="button" class="ib" disabled title="Chưa có câu trả lời" aria-label="Chưa có câu trả lời">' + IC.eye + '</button>'
+      : '<button type="button" class="ib" data-act="view" data-id="' + s.id + '" title="Xem phiếu (câu trả lời gần nhất)" aria-label="Xem phiếu">' + IC.eye + '</button>';
+    return '<span class="acts">' + view + '<button type="button" class="ib" data-act="log" data-id="' + s.id + '" title="Nhật ký khảo sát" aria-label="Nhật ký khảo sát">' + IC.hist + '</button></span>';
   }
 
   function listKhaoSat() {
     const rows = filterSurveys(), p = paginate('ks', rows);
-    const done = rows.filter(s => s.status === 'DA'), auto = rows.filter(s => s.status === 'AUTO'), pend = rows.filter(s => s.status === 'CHUA');
-    // BR12 (chốt 19/10): chỉ hiện số đếm theo trạng thái
-    $('#sum').innerHTML = 'Đã khảo sát <b>' + done.length + '</b> · Tự ghi nhận <b>' + auto.length + '</b> · Chưa khảo sát <b>' + pend.length + '</b>';
+    // BR12 (chốt 19/10): chỉ hiện số đếm theo trạng thái – dạng chip, bấm để lọc nhanh (Đề xuất)
+    $('#sum').innerHTML = chipsHTML('ks', filterSurveys(true), [['DA', 'Đã khảo sát'], ['AUTO', 'Tự ghi nhận'], ['CHUA', 'Chưa khảo sát']]);
     const body = p.view.map((s, i) =>
       '<tr data-id="' + s.id + '"><td class="i">' + (p.start + i + 1) + '</td>' +
       '<td>' + esc(s.ten) + (s.sim ? '<span class="gl">giả lập</span>' : '') + '</td>' +
       '<td>' + esc(s.cap1) + '</td><td>' + esc(s.cap2) + '</td>' +
       '<td>' + accHTML(s.qlbp) + '</td><td>' + (s.qldv ? accHTML(s.qldv) : '<span class="mu">—</span>') + '</td><td>' + accHTML(s.auditor) + '</td>' +
       '<td class="c" title="' + fDT(s.tgGui) + '">' + fD(s.tgGui) + '</td><td class="c">' + dueHTML(s) + '</td>' +
-      '<td class="c"><a data-act="log" data-id="' + s.id + '" title="Nhật ký khảo sát">' + mailsOf(s.id).length + '</a>' + (s.status === 'CHUA' ? '<span class="sub-n">nhắc ' + s.auto + '/' + MAX_AUTO + '</span>' : '') + '</td>' +
+      '<td class="c"><a data-act="log" data-id="' + s.id + '" title="Nhật ký khảo sát">' + mailsOf(s.id).length + '</a>' + (s.status === 'CHUA' ? remindHTML(s) : '') + '</td>' +
       '<td class="c">' + badge(s) + '</td><td>' + scoreHTML(s) + '</td>' +
       '<td>' + whoHTML(s) + '</td><td class="c">' + (s.at ? fDT(s.at) : '<span class="mu">—</span>') + '</td>' +
       '<td class="c">' + actions(s) + '</td></tr>').join('');
-    $('#list').innerHTML = '<div class="gwrap"><table class="grid"><thead><tr>' +
+    $('#list').innerHTML = '<div class="gwrap"><table class="grid nx"><thead><tr>' +
       '<th class="i"></th><th>Tên báo cáo</th><th>Đơn vị cấp 1</th><th>Đơn vị cấp 2</th>' +
       '<th>QLBP<br>(Auditee)</th><th>QLĐV cấp 2<br>(Auditee)</th><th>Auditor</th><th class="c">Ngày gửi<br>báo cáo</th><th class="c">Hạn<br>khảo sát</th><th class="c">Lần gửi<br>mail</th>' +
       '<th class="c">Trạng thái</th><th>Mức độ<br>hài lòng</th><th>Người nhập</th><th class="c">Thời gian<br>nhập</th><th class="c">Thao tác</th></tr></thead><tbody>' +
-      (body || '<tr><td colspan="15" class="empty">Không có dữ liệu</td></tr>') + '</tbody></table></div>' +
+      (body || emptyRow(15, 'Không có dữ liệu')) + '</tbody></table></div>' +
       pagerHTML('ks', rows.length, p.page, p.size, p.pages);
+  }
+
+  /* --- KHẢO SÁT › Kết quả khảo sát: bảng giống file Excel kết quả của phiếu thật (BR19) --- */
+  // Khung tìm kiếm theo mẫu màn Khảo sát cuộc đánh giá (v9.1 · Đề xuất); danh sách chọn lấy trong phạm vi xem của vai trò
+  function viewKetQua() {
+    const f = S.f.kq, sc = scope().sort(byTime);
+    return '<section class="panel"><div class="panel-h">Thông tin tìm kiếm</div><div class="panel-b">' +
+        '<div class="lgd">Tìm kiếm</div><div class="fgrid">' +
+          fld('Tên báo cáo', selHTML('ten', 'Chọn để tìm kiếm', optList(uniq(sc.map(s => s.ten)), f.ten), f.ten)) +
+          fld('Thời gian hoàn thành', rngHTML(f)) +
+          fld('Mức độ hài lòng', selHTML('sc', 'Chọn để tìm kiếm', optPairs([5, 4, 3, 2, 1].map(n => [n, scoreTxt(n)]), f.sc), f.sc)) +
+          fld('Đơn vị được kiểm soát', selHTML('dv', 'Chọn để tìm kiếm', optList(uniq(sc.map(s => s.cap2).filter(Boolean)).sort(), f.dv), f.dv)) +   // chỉ Đơn vị cấp 2 (yêu cầu 21/10)
+          fld('Auditor', selHTML('aud', 'Nhập để tìm kiếm', optList(uniq(sc.map(s => s.auditor)).sort(), f.aud), f.aud)) +
+          fld('Đơn vị kiểm soát', selHTML('dvks', 'Chọn để tìm kiếm', optList(uniq(sc.map(s => s.dvks)).sort(), f.dvks), f.dvks)) +
+        '</div><div class="btn-row"><button class="btn pri" data-act="search">' + IC.search + 'Tìm kiếm</button>' +
+          (S.role === 'QLDV' ? '' : ' <button class="btn xl" data-act="exportkq" title="Xuất kết quả đang tìm kiếm (toàn bộ các trang) ra Excel (.xlsx), đúng 10 cột như bảng">' + IC.xls + 'Xuất Excel</button>') + '</div>' +
+      '</div></section>' +
+      '<section class="panel"><div class="panel-h">Kết quả khảo sát<span class="hd-r"><span class="lg5" title="Màu chấm ở ô câu chọn theo mức 5 → 1">Mức' +
+        [5, 4, 3, 2, 1].map(n => '<i class="s' + n + '"></i>' + n).join('') + '</span><span id="sum"></span></span></div><div id="list"></div></section>';
+  }
+  // Câu trả lời trong phạm vi xem + điều kiện Tìm kiếm, Id tăng dần (như file Excel kết quả).
+  // Lọc theo dòng báo cáo dự thảo gắn với câu trả lời, không theo chữ ở câu 1 (câu 1 sửa được) – Đề xuất
+  function filterResults() {
+    const f = S.f.kq, sc = new Map(scope().map(s => [s.id, s]));
+    return S.results.filter(x => {
+      const s = sc.get(x.sid);
+      return !!s && (!f.ten || s.ten === f.ten) && (!f.dv || s.cap2 === f.dv) && (!f.dvks || s.dvks === f.dvks) &&
+        (!f.aud || s.auditor === f.aud) && (!f.sc || String(x.a.C2) === f.sc) && inRange(x.end, f);
+    }).sort((p, q) => p.id - q.id);
+  }
+  function listKetQua() {
+    const rows = filterResults();
+    $('#sum').innerHTML = '<b>' + rows.length + '</b> câu trả lời';
+    const fl = UI.flash; UI.flash = null;                   // dòng vừa gửi: mở đúng trang có dòng đó, nháy sáng 1 lần
+    if (fl) { const i = rows.findIndex(x => x.id === fl); if (i >= 0) S.page.kq = Math.floor(i / S.size.kq) + 1; }
+    const p = paginate('kq', rows);
+    const cell = (c, v) => QS[c].type === 'choice' && v != null ? '<span class="ch s' + v + '"><i aria-hidden="true"></i>' + esc(ansTxt(c, v)) + '</span>' : esc(ansTxt(c, v));
+    const body = p.view.map(x => '<tr data-rid="' + x.id + '"' + (x.id === fl ? ' class="flash"' : '') + '><td class="c id">' + x.id + '</td><td class="c t">' + fDTS(x.start) + '</td><td class="c t">' + fDTS(x.end) + '</td>' +
+      QCODES.map(c => '<td>' + cell(c, x.a[c]) + '</td>').join('') + '</tr>').join('');
+    $('#list').innerHTML = '<div class="gwrap"><table class="grid kq nx"><colgroup>' + RES_COLS.map(c => '<col' + (c.w ? ' style="width:' + c.w + 'px"' : '') + '>').join('') + '</colgroup><thead><tr>' +
+      RES_COLS.map(c => '<th' + (c.c ? ' title="' + c.c + ' · ' + esc(QS[c.c].t) + '"' : '') + '>' + esc(c.h) + '</th>').join('') + '</tr></thead><tbody>' +
+      (body || emptyRow(RES_COLS.length, Object.keys(S.f.kq).some(k => S.f.kq[k]) ? 'Không có câu trả lời phù hợp điều kiện tìm kiếm' : 'Chưa có câu trả lời')) + '</tbody></table></div>' +
+      pagerHTML('kq', rows.length, p.page, p.size, p.pages);
+    const tr = fl && $('#list tr.flash');
+    if (tr) { const g = $('#list .gwrap'); g.scrollTop += tr.getBoundingClientRect().top - g.getBoundingClientRect().top - (g.clientHeight - tr.offsetHeight) / 2; }
   }
 
   /* --- Màn hiện có: Báo cáo dự thảo --- */
   function viewBaoCao() {
     const f = S.f.bc, rs = reportScope().sort(byTime);
-    return '<div class="anno">' + IC.info + '<div><b>Màn hiện có – giữ nguyên.</b> Mỗi dòng báo cáo dự thảo có Đơn vị cấp 1/cấp 2 → hệ thống tự sinh 1 dòng ở màn <span class="lk" data-act="nav" data-k="khaosat">Khảo sát cuộc đánh giá</span> và gửi mail khảo sát To QLBP, CC QLĐV cấp 2 + Auditor (BR01–BR02). QLBP và QLĐV cấp 2 (auditee) không vào được màn này (BR07). Dòng trống cả 2 đơn vị → không sinh (BR10 · Đề xuất).</div></div>' +
-      '<section class="panel"><div class="panel-h">Thông tin kế hoạch kiểm soát</div><div class="panel-b">' +
+    return '<section class="panel"><div class="panel-h">Thông tin kế hoạch kiểm soát</div><div class="panel-b">' +
         '<div class="lgd">Tìm kiếm</div><div class="fgrid">' +
           fld('Tên báo cáo', selHTML('ten', 'Chọn để tìm kiếm', optList(uniq(rs.map(r => r.ten)), f.ten), f.ten)) +
           fld('Thời gian báo cáo', rngHTML(f)) + '<div class="fld"></div>' +
@@ -925,27 +1438,28 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   const xlSerial = d => (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()) - Date.UTC(1899, 11, 30)) / DAY;
   const xText = (ref, v, st) => '<c r="' + ref + '" t="inlineStr" s="' + st + '"><is><t xml:space="preserve">' + xmlEsc(v) + '</t></is></c>';
   function xCell(ref, v, kind) {
-    const st = { s: 2, c: 3, n: 3, dt: 4, d: 5 }[kind] || 2;
+    const st = { s: 2, c: 3, n: 3, dt: 4, d: 5, ts: 8 }[kind] || 2;      // ts = ngày giờ đến giây (Kết quả khảo sát)
     if (v === '' || v == null) return '<c r="' + ref + '" s="' + st + '"/>';
     if (kind === 'n' && typeof v === 'number') return '<c r="' + ref + '" s="' + st + '"><v>' + v + '</v></c>';
-    if ((kind === 'dt' || kind === 'd') && v instanceof Date) return '<c r="' + ref + '" s="' + st + '"><v>' + String(xlSerial(v)) + '</v></c>';
+    if ((kind === 'dt' || kind === 'd' || kind === 'ts') && v instanceof Date) return '<c r="' + ref + '" s="' + st + '"><v>' + String(xlSerial(v)) + '</v></c>';
     return xText(ref, v, st);
   }
   const XL_SHEET = 'Khảo sát';
-  function sheetXml(meta, rows) {
-    const H = meta.length + 1, last = Math.max(H + rows.length, H), lastCol = colName(XCOLS.length - 1);
+  function sheetXml(meta, rows, cols, hh) {
+    cols = cols || XCOLS;
+    const H = meta.length + 1, last = Math.max(H + rows.length, H), lastCol = colName(cols.length - 1);
     let x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
       '<dimension ref="A1:' + lastCol + last + '"/>' +
       '<sheetViews><sheetView workbookViewId="0"><pane ySplit="' + H + '" topLeftCell="A' + (H + 1) + '" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
-      '<sheetFormatPr defaultRowHeight="15"/><cols>' + XCOLS.map((c, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + c[1] + '" customWidth="1"/>').join('') + '</cols><sheetData>';
+      '<sheetFormatPr defaultRowHeight="15"/><cols>' + cols.map((c, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + c[1] + '" customWidth="1"/>').join('') + '</cols><sheetData>';
     meta.forEach((m, i) => { x += '<row r="' + (i + 1) + '">' + xText('A' + (i + 1), m, i === 0 ? 6 : 7) + '</row>'; });
-    x += '<row r="' + H + '" ht="32" customHeight="1">' + XCOLS.map((c, i) => xText(colName(i) + H, c[0], 1)).join('') + '</row>';
-    rows.forEach((r, ri) => { const rn = H + 1 + ri; x += '<row r="' + rn + '">' + r.map((v, ci) => xCell(colName(ci) + rn, v, XCOLS[ci][2])).join('') + '</row>'; });
+    x += '<row r="' + H + '" ht="' + (hh || 32) + '" customHeight="1">' + cols.map((c, i) => xText(colName(i) + H, c[0], 1)).join('') + '</row>';
+    rows.forEach((r, ri) => { const rn = H + 1 + ri; x += '<row r="' + rn + '">' + r.map((v, ci) => xCell(colName(ci) + rn, v, cols[ci][2])).join('') + '</row>'; });
     return x + '</sheetData><autoFilter ref="A' + H + ':' + lastCol + last + '"/>' +
       '<pageMargins left="0.4" right="0.4" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape"/></worksheet>';
   }
   const XL_STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<numFmts count="2"><numFmt numFmtId="164" formatCode="dd/mm/yyyy hh:mm"/><numFmt numFmtId="165" formatCode="dd/mm/yyyy"/></numFmts>' +
+    '<numFmts count="3"><numFmt numFmtId="164" formatCode="dd/mm/yyyy hh:mm"/><numFmt numFmtId="165" formatCode="dd/mm/yyyy"/><numFmt numFmtId="166" formatCode="dd/mm/yyyy hh:mm:ss"/></numFmts>' +
     '<fonts count="4"><font><sz val="11"/><name val="Arial"/><family val="2"/></font>' +
     '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/><family val="2"/></font>' +
     '<font><b/><sz val="14"/><color rgb="FF54547E"/><name val="Arial"/><family val="2"/></font>' +
@@ -955,14 +1469,15 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
     '<border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="8"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+    '<cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
     '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
     '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
     '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
     '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
     '<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
     '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
-    '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>' +
+    '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+    '<xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>' +
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
 
   // ZIP kiểu "store" (không nén) – đủ cho file .xlsx
@@ -993,16 +1508,17 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cdSize, true); end.setUint32(16, offset, true); end.setUint16(20, 0, true);
     return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
-  function buildXlsxBlob(meta, rows) {
-    const H = meta.length + 1, lastRow = Math.max(H + rows.length, H), lastCol = colName(XCOLS.length - 1);
+  function buildXlsxBlob(meta, rows, cols, sheet, hh) {
+    cols = cols || XCOLS; sheet = sheet || XL_SHEET;
+    const H = meta.length + 1, lastRow = Math.max(H + rows.length, H), lastCol = colName(cols.length - 1);
     const X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
     return zipStore([
       { name: '[Content_Types].xml', text: X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' },
       { name: '_rels/.rels', text: X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
-      { name: 'xl/workbook.xml', text: X + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="' + XL_SHEET + '" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">\'' + XL_SHEET + '\'!$A$' + H + ':$' + lastCol + '$' + lastRow + '</definedName></definedNames></workbook>' },
+      { name: 'xl/workbook.xml', text: X + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="' + sheet + '" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">\'' + sheet + '\'!$A$' + H + ':$' + lastCol + '$' + lastRow + '</definedName></definedNames></workbook>' },
       { name: 'xl/_rels/workbook.xml.rels', text: X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
       { name: 'xl/styles.xml', text: XL_STYLES },
-      { name: 'xl/worksheets/sheet1.xml', text: sheetXml(meta, rows) }
+      { name: 'xl/worksheets/sheet1.xml', text: sheetXml(meta, rows, cols, hh) }
     ], S.now);
   }
   // Xuất đúng danh sách đang hiển thị: phạm vi vai trò + điều kiện đã Tìm kiếm, toàn bộ các trang
@@ -1031,10 +1547,24 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     toast('Đã xuất <b>' + list.length + '</b> dòng (đúng danh sách đang hiển thị, toàn bộ các trang) → ' + esc(name), 'ok', 5000);
   }
 
+  /* Xuất Excel màn Kết quả khảo sát (v9 · Đề xuất): đúng 10 cột như bảng, không thêm dòng tiêu đề;
+     đúng kết quả đang tìm kiếm trong phạm vi xem (mọi trang – v9.1); Id dạng số, thời gian là ngày giờ Excel dd/mm/yyyy hh:mm:ss */
+  const KQ_COLS = RES_COLS.map((c, i) => [c.h, i === 0 ? 7 : i < 3 ? 20 : c.c === 'C7' ? 48 : c.c === 'C3' ? 34 : 30, i === 0 ? 'n' : i < 3 ? 'ts' : 's']);
+  const kqExportRow = x => [x.id, x.start, x.end].concat(QCODES.map(c => ansTxt(c, x.a[c])));
+  function exportKetQua() {
+    const rows = filterResults();
+    const name = 'Ket_qua_khao_sat_' + S.now.getFullYear() + pad(S.now.getMonth() + 1) + pad(S.now.getDate()) + '_' + pad(S.now.getHours()) + pad(S.now.getMinutes()) + '.xlsx';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(buildXlsxBlob([], rows.map(kqExportRow), KQ_COLS, 'Kết quả khảo sát', 96)); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast('Đã xuất <b>' + rows.length + '</b> câu trả lời (đúng kết quả đang tìm kiếm, toàn bộ các trang, 10 cột) → ' + esc(name), 'ok', 5000);
+  }
+
   /* ===== Modal ===== */
   function openModal(html) { const m = document.createElement('div'); m.className = 'mask'; m.innerHTML = html; $('#mroot').appendChild(m); return m; }
-  function closeModal() { const ms = $$('#mroot .mask'); if (ms.length) ms[ms.length - 1].remove(); }
-  function closeAll() { $('#mroot').innerHTML = ''; }
+  function closeModal() { const ms = $$('#mroot .mask'); if (ms.length) ms[ms.length - 1].remove(); if (!$('#mroot .sv')) F = null; }
+  function closeAll() { $('#mroot').innerHTML = ''; F = null; }
   function topModal() { const ms = $$('#mroot .mask'); return ms[ms.length - 1]; }
   function confirmBox(title, msg, okText, onOk) {
     const m = openModal('<div class="mdl sm" role="dialog"><div class="mdl-h">' + esc(title) + '<span class="cl" data-act="x">×</span></div><div class="mdl-b">' + msg + '</div>' +
@@ -1042,100 +1572,138 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     $('[data-ok]', m).addEventListener('click', ev => { ev.stopPropagation(); m.remove(); onOk(); });
   }
 
-  /* ===== Phiếu khảo sát =====
-     mode: edit = QLBP nhập (trước hạn) · view = xem phiếu đã có (QLBP nhập hoặc tự ghi nhận) */
+  /* ===== Phiếu khảo sát (màn hình nhập) – giống phiếu thật (BR11, BR16–BR18) =====
+     mode: edit = QLBP nhập (còn hạn; gửi không giới hạn số lần) · view = xem câu trả lời gần nhất / kết quả tự ghi nhận */
+  const headHTML = desc => '<div class="sv-hd"><div class="sv-top"><div class="sv-lg" title="Logo FTQ – để trống khi chưa có ảnh"></div>' +
+    '<div class="sv-tt">[FTQ] PHIẾU KHẢO SÁT CHẤT LƯỢNG VÀ HIỆU QUẢ CUỘC ĐÁNH GIÁ</div></div>' +
+    (desc ? '<div class="sv-in"><p>Với mục tiêu cải tiến, nâng cao chất lượng và hiệu quả của các cuộc đánh giá, FTQ rất mong Anh/Chị dành thời gian góp ý về Cuộc đánh giá đã thực hiện tại đơn vị.</p><p>Xin chân thành cảm ơn những ý kiến của Anh/Chị.</p></div>' : '') + '</div>';
+
   function resultBanner(s) {
-    if (s.status === 'AUTO') return '<div class="sv-auto">Hết hạn khảo sát <b>' + fD(dueDate(s)) + '</b>, QLBP chưa nhập → <b>Hệ thống tự ghi nhận "' + scoreTxt(AUTO_SCORE) + '"</b> lúc ' + fDT(s.at) + '.<br>Phiếu đã khóa, không nhập được (BR05).</div>';
-    return '<div class="sv-done">Gửi lúc <b>' + fDT(s.at) + '</b> · Người nhập: <b>' + esc(s.by) + '</b> (QLBP auditee)</div>';
+    if (s.status === 'AUTO') return '<div class="sv-auto">Hết hạn khảo sát <b>' + fD(dueDate(s)) + '</b>, QLBP chưa nhập → <b>Hệ thống tự ghi nhận câu 2 "' + scoreTxt(AUTO_SCORE) + '"</b> lúc ' + fDT(s.at) + '. Phiếu đã khóa, không nhập được.</div>';
+    const rs = resOf(s), x = rs[rs.length - 1];
+    return '<div class="sv-done">Câu trả lời gần nhất · Kết quả khảo sát Id <b>' + x.id + '</b> · bắt đầu ' + fDTS(x.start) + ' · hoàn thành <b>' + fDTS(x.end) + '</b><br>Người nhập: <b>' + esc(S.subBy[x.id]) + '</b> (QLBP)' + (rs.length > 1 ? ' · đơn vị đã gửi ' + rs.length + ' lần' : '') + '</div>';
+  }
+
+  function qHTML(c, ro) {
+    const q = QS[c], v = F.a[c];
+    const ctl = q.type === 'text'
+      ? '<input class="ans" data-qin="' + c + '" placeholder="Nhập câu trả lời của bạn" autocomplete="off" value="' + esc(v == null ? '' : v) + '"' + (ro ? ' disabled' : '') + '>'
+      : '<div class="opts">' + [5, 4, 3, 2, 1].map(n => '<label class="opt' + (v === n ? ' on' : '') + '"><input type="radio" name="' + c + '" value="' + n + '"' + (v === n ? ' checked' : '') + (ro ? ' disabled' : '') + '>' + esc(q.scale[n]) + '</label>').join('') + '</div>';
+    return '<div class="q" data-q="' + c + '" hidden><div class="q-t"><span class="n"></span>' + esc(q.t) + ' <span class="req">*</span></div>' + ctl + '<div class="em">Câu hỏi này là bắt buộc.</div></div>';
+  }
+
+  function formHTML(s) {
+    const ro = F.mode === 'view';
+    return '<span class="sv-x" data-act="x" title="Đóng" aria-label="Đóng">×</span><div class="sv-wrap">' +
+      '<div class="sv' + (ro ? ' ro' : '') + '" role="dialog" aria-label="Phiếu khảo sát">' + headHTML(true) +
+      '<div class="sv-bd">' + (ro ? resultBanner(s) : '') +
+        '<p class="sv-note">Khi bạn gửi biểu mẫu này, nó sẽ không tự động thu thập các chi tiết của bạn như tên và địa chỉ email trừ khi bạn tự cung cấp nó.</p>' +
+        '<p class="req-note"><span class="req">*</span> Bắt buộc</p>' +
+        '<div class="qs">' + QCODES.map(c => qHTML(c, ro)).join('') + '</div>' +
+        (ro ? '<div class="sv-ft"><button class="btn" data-act="x">Đóng</button></div>'
+          : '<p class="sv-print">Bạn có thể in một bản sao câu trả lời của mình sau khi bạn gửi</p><div class="sv-ft"><button class="sv-btn" data-act="submit">Gửi</button></div>') +
+      '</div></div></div>';
+  }
+
+  // Thứ tự và số thứ tự theo vị trí hiển thị; đổi C2 → tính lại ngay, giữ câu đã trả lời (BR16, BR17)
+  function layoutForm() {
+    const root = topModal(), box = root && $('.qs', root); if (!box || !F) return;
+    const want = F.a.C2 != null && F.a.C2 <= 2 ? PATH_LO : PATH_HI;
+    if ($$('.q', box).map(el => el.dataset.q).join() !== want.join()) want.slice(2).forEach(c => box.appendChild($('[data-q=' + c + ']', box)));
+    const vis = F.mode === 'view' ? pathOf(F.a) : visibleQs(F.a);
+    QCODES.forEach(c => {
+      const el = $('[data-q=' + c + ']', box), i = vis.indexOf(c);
+      el.hidden = i < 0; $('.n', el).textContent = i < 0 ? '' : (i + 1) + '.';
+    });
   }
 
   function openSurvey(id, mode) {
     const s = getS(id); if (!s) return;
-    if (mode === 'edit' && S.now > dueEnd(s)) { finalizeOverdue(); renderAll(); }
-    if (s.status !== 'CHUA') mode = 'view';
+    if (S.now > dueEnd(s) && finalizeOverdue()) renderAll();
+    if (mode === 'edit' && (s.status === 'AUTO' || S.now > dueEnd(s))) mode = 'view';     // BR05: quá hạn không cho nhập
     if (mode === 'edit' && (S.role !== 'QLBP' || s.qlbp !== S.user)) { toast('Chỉ QLBP (auditee) của đơn vị mới nhập được phiếu – không cho đánh giá hộ', 'warn'); return; }
     if (mode === 'view' && s.status === 'CHUA') { toast('Phiếu chưa có kết quả', 'info'); return; }
-    const ro = mode === 'view', due = fD(dueDate(s));
-    const opts = [5, 4, 3, 2, 1].map(n => '<label class="opt' + (ro && s.score === n ? ' on' : '') + '"><input type="radio" name="q2" value="' + n + '"' + (ro ? ' disabled' : '') + (ro && s.score === n ? ' checked' : '') + '>' + scoreTxt(n) +
-      (ro && s.status === 'AUTO' && n === AUTO_SCORE ? ' <span class="mu" style="font-weight:400">(hệ thống tự ghi nhận)</span>' : '') + '</label>').join('');
-    openModal('<div class="sv" role="dialog" aria-label="Phiếu khảo sát">' +
-      '<div class="sv-hd"><span class="cl" data-act="x" title="Đóng">×</span>' +
-        '<div class="sv-top"><div class="sv-lg">FTQ</div><div class="sv-tt">[FTQ] Phiếu khảo sát chất lượng và hiệu quả cuộc đánh giá</div></div>' +
-        '<div class="sv-in"><p>Với mục tiêu cải tiến, nâng cao chất lượng và hiệu quả của các cuộc đánh giá, FTQ rất mong Anh/Chị dành thời gian góp ý về Cuộc đánh giá đã thực hiện tại đơn vị.</p><p>Xin chân thành cảm ơn những ý kiến của Anh/Chị.</p></div>' +
-      '</div>' +
-      '<div class="sv-bd">' +
-        '<div class="sv-meta-h">Thông tin cuộc đánh giá<span class="dx">Đề xuất</span></div>' +
-        '<div class="sv-meta">' +
-          '<div><span>Cuộc đánh giá</span>' + esc(s.ten) + '</div>' +
-          '<div><span>Đơn vị cấp 1 / cấp 2</span>' + esc(s.cap1 || '—') + ' / ' + esc(s.cap2 || '—') + '</div>' +
-          '<div><span>Tháng KS</span>' + esc(s.thang) + '</div>' +
-          '<div><span>Đơn vị kiểm soát</span>' + esc(s.dvks) + '</div>' +
-          '<div><span>Thời gian gửi</span>' + fDT(s.tgGui) + '</div>' +
-          '<div><span>Hạn khảo sát</span><b>' + due + '</b>' + (s.status === 'CHUA' ? ' <span class="mu">(' + leftTxt(daysLeftAt(s, S.now)) + ')</span>' : '') + '</div>' +
-          '<div><span>QLBP (Auditee)</span>' + esc(s.qlbp) + '</div>' +
-          '<div><span>QLĐV cấp 2 (Auditee)</span>' + esc(s.qldv || '—') + '</div>' +
-          '<div><span>Auditor</span>' + esc(s.auditor) + '</div>' +
-        '</div>' +
-        (ro ? resultBanner(s) : '<div class="sv-warn">⚠ Hạn khảo sát <b>' + due + '</b> (' + leftTxt(daysLeftAt(s, S.now)) + '). Quá hạn mà chưa nhập, hệ thống tự động ghi nhận <b>"' + scoreTxt(AUTO_SCORE) + '"</b> và khóa phiếu, không nhập được nữa.</div>') +
-        '<p class="req-note"><span class="req">*</span> Bắt buộc</p>' +
-        '<div class="q" data-q="q1"><div class="q-t"><span class="n">1.</span>Tên Bộ phận &amp; đơn vị của Anh/Chị (ví dụ: Phòng ... - Chi nhánh...) <span class="req">*</span>' + (ro ? '' : '<span class="dx">Tự điền theo dòng khảo sát, cho sửa · Đề xuất</span>') + '</div>' +
-          '<input class="ans" id="q1" placeholder="Nhập câu trả lời của bạn" value="' + esc(ro ? s.q1 : defaultQ1(s)) + '"' + (ro ? ' disabled' : '') + '><div class="em">Vui lòng nhập câu trả lời.</div></div>' +
-        '<div class="q" data-q="q2"><div class="q-t"><span class="n">2.</span>Mức độ hài lòng chung của anh/chị về cuộc đánh giá? <span class="req">*</span></div><div class="opts">' + opts + '</div><div class="em">Vui lòng chọn mức độ hài lòng.</div></div>' +
-        '<div class="sv-ft">' + (ro ? '<button class="btn" data-act="x">Đóng</button>' : '<button class="sv-btn" data-act="submit" data-id="' + s.id + '">Gửi</button><button class="btn" data-act="x">Hủy</button>') + '</div>' +
-      '</div></div>');
+    let a = Object.assign(blankAns(), { C1: defaultQ1(s) });   // mỗi lần mở là phiếu trống; câu 1 tự điền Đơn vị cấp 2 (yêu cầu 21/10), QLBP vẫn sửa được
+    if (mode === 'view') { const rs = resOf(s); a = s.status === 'AUTO' ? Object.assign(blankAns(), { C1: s.q1, C2: AUTO_SCORE }) : Object.assign({}, rs[rs.length - 1].a); }
+    closeAll();
+    F = { sid: s.id, mode, a, start: new Date(S.now), startReal: Date.now() };
+    openModal(formHTML(s));
+    layoutForm();
   }
 
-  function submitSurvey(id) {
-    const s = getS(id), root = topModal(); if (!s || !root) return;
-    if (s.status !== 'CHUA' || S.now > dueEnd(s)) {          // BR05: quá hạn không cho nhập
+  function submitSurvey() {
+    const root = topModal(); if (!F || F.mode !== 'edit' || !root) return;
+    const s = getS(F.sid); if (!s) return;
+    let end = new Date(F.start.getTime() + Math.max(1000, Date.now() - F.startReal));   // giờ giả lập lúc mở + thời gian điền thật
+    if (S.now > end) end = new Date(S.now);
+    if (s.status === 'AUTO' || end > dueEnd(s)) {          // BR05: quá hạn không cho nhập
+      const wasDA = s.status === 'DA';
+      if (end > S.now) S.now = end;
       finalizeOverdue(); closeAll(); renderAll();
-      toast('Đã quá hạn khảo sát ' + fD(dueDate(s)) + '. Hệ thống đã tự ghi nhận "' + scoreTxt(AUTO_SCORE) + '", không nhập được.', 'warn', 5000);
+      toast('Đã quá hạn khảo sát ' + fD(dueDate(s)) + '. ' + (wasDA ? 'Không gửi thêm được.' : 'Hệ thống đã tự ghi nhận "' + scoreTxt(AUTO_SCORE) + '", không nhập được.'), 'warn', 5000);
       return;
     }
-    const q1 = $('#q1', root).value.trim(), q2 = $('input[name=q2]:checked', root);
-    $('[data-q=q1]', root).classList.toggle('err', !q1);
-    $('[data-q=q2]', root).classList.toggle('err', !q2);
-    if (!q1 || !q2) { const er = $('.q.err', root); if (er) er.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
-    confirmBox('Xác nhận gửi phiếu', 'Sau khi gửi, phiếu không chỉnh sửa được. Anh/Chị xác nhận gửi phiếu khảo sát?', 'Gửi phiếu', () => {
-      Object.assign(s, { status: 'DA', q1, score: +q2.value, by: S.user, byRole: 'QLBP', at: new Date(S.now) });
-      tick(1); closeAll(); renderAll();
-      toast('Gửi phiếu khảo sát thành công. Dòng chuyển <b>Đã khảo sát</b>, ngừng mail nhắc.', 'ok', 5000);
-    });
+    let first = null;                                       // BR18: chặn câu bắt buộc bỏ trống, báo lỗi dưới câu
+    visibleQs(F.a).forEach(c => { const bad = !isAns(F.a, c); $('[data-q=' + c + ']', root).classList.toggle('err', bad); if (bad && !first) first = c; });
+    if (first) { $('[data-q=' + first + ']', root).scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    const a = {}; QCODES.forEach(c => { a[c] = QS[c].type === 'text' ? String(F.a[c]).trim() : F.a[c]; });
+    const x = { id: ++S.resSeq, sid: s.id, start: new Date(F.start), end, a };       // dòng Kết quả khảo sát: không có tên / email
+    S.results.push(x); UI.flash = x.id;
+    S.subBy[x.id] = S.user;                                 // CMS ghi người nhập (BR08) – không thuộc dữ liệu phiếu
+    const firstTime = s.status === 'CHUA';
+    Object.assign(s, { status: 'DA', q1: a.C1, score: a.C2, by: S.user, byRole: 'QLBP', at: end, subs: (s.subs || 0) + 1 });
+    S.now = end; finalizeOverdue(); syncTo();
+    showThanks(s, x, firstTime);
+    renderAll();
+  }
+
+  // Phiếu thật không đặt lời cảm ơn riêng → màn cảm ơn đơn giản (BR18)
+  function showThanks(s, x, firstTime) {
+    const root = topModal(); if (!root) return;
+    F = null;
+    root.innerHTML = '<span class="sv-x" data-act="x" title="Đóng" aria-label="Đóng">×</span><div class="sv-wrap">' +
+      '<div class="sv" role="dialog" aria-label="Đã gửi phiếu">' + headHTML(false) +
+      '<div class="sv-bd sv-ty"><div class="ty-ic">' + IC.check + '</div><div class="ty-t">Cảm ơn bạn!</div><p>Câu trả lời của bạn đã được gửi.</p></div></div></div>';
   }
 
   /* ===== Nhật ký & mail ===== */
   function openLog(id) {
     const s = getS(id); if (!s) return;
-    const who = s.status === 'DA' ? '<b>' + esc(s.by) + '</b> · QLBP (auditee) · ' + fDT(s.at)
-      : s.status === 'AUTO' ? '<b>Hệ thống</b><span class="tag-auto">Tự ghi nhận</span> · ' + scoreTxt(AUTO_SCORE) + ' · ' + fDT(s.at)
+    const who = s.status === 'DA' ? whoHTML(s) + '<span class="mu">· ' + fDT(s.at) + '</span>'
+      : s.status === 'AUTO' ? whoHTML(s) + '<span class="mu">· ' + scoreTxt(AUTO_SCORE) + ' · ' + fDT(s.at) + '</span>'
       : '<span class="mu">Chưa có phiếu</span>';
-    openModal('<div class="mdl lg" role="dialog"><div class="mdl-h">Nhật ký khảo sát<span class="cl" data-act="x">×</span></div><div class="mdl-b">' +
-      '<dl class="kv2"><dt>Tên báo cáo</dt><dd>' + esc(s.ten) + '</dd><dt>Đơn vị cấp 1 / 2</dt><dd>' + esc(s.cap1) + ' / ' + esc(s.cap2) + '</dd>' +
-      '<dt>To (QLBP)</dt><dd>' + esc(s.qlbp) + '</dd><dt>CC</dt><dd>' + esc(ccOf(s)) + ' <span class="mu">(QLĐV cấp 2; Auditor)</span></dd>' +
-      '<dt>Hạn khảo sát</dt><dd>' + fD(dueDate(s)) + (s.status === 'CHUA' ? ' <span class="mu">(' + leftTxt(daysLeftAt(s, S.now)) + ')</span>' : '') + '</dd>' +
-      '<dt>Trạng thái</dt><dd>' + badge(s) + (s.status === 'CHUA' ? ' <span class="mu">· nhắc ' + s.auto + '/' + MAX_AUTO + '</span>' : '') + '</dd>' +
-      '<dt>Người nhập</dt><dd style="grid-column:span 3">' + who + '</dd></dl>' +
-      '<table class="grid"><thead><tr><th class="i"></th><th class="c">Thời gian</th><th>Sự kiện</th><th>Người thực hiện</th><th>Vai trò</th><th>Chi tiết</th></tr></thead><tbody>' +
-      logOf(s).map((e, i) => '<tr class="' + (e.cls || '') + '"><td class="i">' + (i + 1) + '</td><td class="c">' + fDT(e.at) + '</td><td>' + e.ev + '</td><td>' + e.who + '</td><td class="wrap">' + e.role + '</td><td class="wrap">' + e.detail + '</td></tr>').join('') +
+    const EVK = { gen: ['nu', 'plus'], mail: ['bl', 'mail'], rem: ['wa', 'bell'], sub: ['ok', 'okc'], auto: ['sy', 'sys'] };
+    openModal('<div class="mdl lg" role="dialog"><div class="mdl-h">' + IC.hist + 'Nhật ký khảo sát<span class="cl" data-act="x">×</span></div><div class="mdl-b">' +
+      '<div class="desc">' +
+        '<div class="dl">Tên báo cáo</div><div>' + esc(s.ten) + '</div><div class="dl">Đơn vị cấp 1 / 2</div><div>' + esc(s.cap1 || '—') + ' / ' + esc(s.cap2 || '—') + '</div>' +
+        '<div class="dl">To (QLBP)</div><div>' + addr(s.qlbp, true) + '</div><div class="dl">CC</div><div>' + [s.qldv, s.auditor].filter(Boolean).map(e => addr(e)).join('') + '<span class="mu">QLĐV cấp 2; Auditor</span></div>' +
+        '<div class="dl">Hạn khảo sát</div><div>' + dueHTML(s) + '</div><div class="dl">Trạng thái</div><div>' + badge(s) + (s.status === 'CHUA' ? remindHTML(s) : '') + '</div>' +
+        '<div class="dl">Người nhập</div><div class="wide">' + who + '</div>' +
+      '</div>' +
+      '<table class="grid nx"><thead><tr><th class="i"></th><th class="c">Thời gian</th><th>Sự kiện</th><th>Người thực hiện</th><th>Vai trò</th><th>Chi tiết</th></tr></thead><tbody>' +
+      logOf(s).map((e, i) => { const k = EVK[e.k] || EVK.gen; return '<tr class="' + (e.cls || '') + '"><td class="i">' + (i + 1) + '</td><td class="c">' + fDT(e.at) + '</td><td><span class="evt"><span class="ei ' + k[0] + '">' + IC[k[1]] + '</span><span>' + e.ev + '</span></span></td><td>' + e.who + '</td><td class="wrap">' + e.role + '</td><td class="wrap">' + e.detail + '</td></tr>'; }).join('') +
       '</tbody></table></div><div class="mdl-f"><button class="btn pri" data-act="x">Đóng</button></div></div>');
   }
 
   function openMailPreview(mid) {
     const m = S.mails.find(x => x.id === mid); if (!m) return;
     const s = getS(m.sid), due = fD(dueDate(s));
-    const rm = m.type === 'AUTO' ? '<div class="ml-rm">Anh/Chị chưa thực hiện khảo sát cho cuộc đánh giá dưới đây. Đây là mail nhắc lần <b>' + m.n + '/' + MAX_AUTO + '</b> · Hạn khảo sát <b>' + due + '</b> (' + leftTxt(daysLeftAt(s, m.at)) + ').</div>' : '';
-    openModal('<div class="mdl" role="dialog"><div class="mdl-h">Nội dung mail<span class="dx">Mẫu · Đề xuất</span><span class="cl" data-act="x">×</span></div><div class="mdl-b">' +
-      '<div class="ml-hd"><div><b>Từ</b>Hệ thống FTEL CMS (mail tự động)</div><div><b>Đến</b>' + esc(m.to) + '</div><div><b>CC</b>' + esc(m.cc) + '</div><div><b>Thời gian</b>' + fDT(m.at) + '</div><div><b>Tiêu đề</b>' + esc(m.subject) + '</div></div>' +
-      '<div class="ml-bd">' + rm +
+    const rm = m.type === 'AUTO' ? '<div class="ml-rm">' + IC.bell + '<div>Anh/Chị chưa thực hiện khảo sát cho cuộc đánh giá dưới đây. Đây là mail nhắc lần <b>' + m.n + '/' + MAX_AUTO + '</b> · Hạn khảo sát <b>' + due + '</b> (' + leftTxt(daysLeftAt(s, m.at)) + ').</div></div>' : '';
+    openModal('<div class="mdl" role="dialog"><div class="mdl-h">' + IC.mail + 'Nội dung mail<span class="cl" data-act="x">×</span></div><div class="mdl-b">' +
+      '<div class="ml-subj">' + esc(m.subject) + '</div>' +
+      '<div class="ml-meta"><span class="k">Từ</span><span>Hệ thống FTEL CMS (mail tự động)</span><span class="k">Đến</span><span>' + addr(m.to, true) + '</span>' +
+        '<span class="k">CC</span><span>' + String(m.cc).split('; ').filter(Boolean).map(e => addr(e)).join('') + '</span>' +
+        '<span class="k">Thời gian</span><span>' + fDT(m.at) + ' &nbsp;' + (m.type === 'TB' ? tagHTML('bl', 'mail', 'Mail khảo sát') : tagHTML('wa', 'bell', m.label)) + '</span></div>' +
+      '<div class="ml-bd ml-card">' + rm +
         '<p>Kính gửi Anh/Chị Quản lý bộ phận – đơn vị <b>' + esc(s.cap2 || s.cap1) + '</b>' + (s.cap1 && s.cap2 ? ' (' + esc(s.cap1) + ')' : '') + ',</p>' +
         '<p>Cuộc đánh giá sau đã được thực hiện tại đơn vị:</p>' +
         '<table><tr><td>Cuộc đánh giá</td><td><b>' + esc(s.ten) + '</b></td></tr><tr><td>Đơn vị cấp 1 / cấp 2</td><td>' + esc(s.cap1) + ' / ' + esc(s.cap2) + '</td></tr>' +
         '<tr><td>Tháng KS</td><td>' + esc(s.thang) + '</td></tr><tr><td>Đơn vị kiểm soát</td><td>' + esc(s.dvks) + '</td></tr>' +
         '<tr><td>Hạn khảo sát</td><td><b>' + due + '</b> (5 ngày kể từ ngày gửi)</td></tr></table>' +
         '<p>Với mục tiêu cải tiến, nâng cao chất lượng và hiệu quả của các cuộc đánh giá, FTQ rất mong Anh/Chị dành thời gian góp ý về Cuộc đánh giá đã thực hiện tại đơn vị.</p>' +
-        '<div class="ml-warn">⚠ <b>Lưu ý:</b> nếu Anh/Chị không nhập khảo sát trước hết ngày <b>' + due + '</b> (quá 5 ngày kể từ ngày gửi), hệ thống sẽ <b>tự động ghi nhận "' + scoreTxt(AUTO_SCORE) + '"</b> và không cho nhập sau thời hạn.</div>' +
-        '<a class="ml-cta" data-act="gomail" data-id="' + s.id + '">Thực hiện khảo sát</a>' +
-        '<p class="mu" style="font-size:12px">Hoặc đăng nhập FTEL CMS › Nhập khảo sát.</p>' +
+        '<div class="ml-warn">' + IC.warn + '<div><b>Lưu ý:</b> nếu Anh/Chị không nhập khảo sát trước hết ngày <b>' + due + '</b> (quá 5 ngày kể từ ngày gửi), hệ thống sẽ <b>tự động ghi nhận "' + scoreTxt(AUTO_SCORE) + '"</b> và không cho nhập sau thời hạn.</div></div>' +
+        '<a class="ml-cta" data-act="gomail" data-id="' + s.id + '">' + IC.edit + 'Thực hiện khảo sát</a>' +
+        '<p class="mu" style="font-size:12px">Hoặc đăng nhập FTEL CMS › KHẢO SÁT › Nhập khảo sát.</p>' +
         '<p>Xin chân thành cảm ơn những ý kiến của Anh/Chị.</p>' +
         '<p class="mu" style="font-size:12px">Mail gửi tự động từ hệ thống FTEL CMS, vui lòng không trả lời.</p>' +
       '</div></div><div class="mdl-f"><button class="btn pri" data-act="x">Đóng</button></div></div>');
@@ -1143,9 +1711,9 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 
   function openMailbox() {
     const ms = S.mails.slice().sort((a, b) => (b.at - a.at) || b.id.localeCompare(a.id));
-    openModal('<div class="mdl lg" role="dialog"><div class="mdl-h">Hộp thư giả lập · mail hệ thống đã gửi (' + ms.length + ')<span class="cl" data-act="x">×</span></div><div class="mdl-b">' +
-      '<div class="gwrap" style="max-height:470px"><table class="grid"><thead><tr><th class="c">Thời gian gửi</th><th>Loại mail</th><th>To</th><th>CC</th><th>Tiêu đề</th><th class="c">Nội dung</th></tr></thead><tbody>' +
-      ms.map(m => '<tr><td class="c">' + fDT(m.at) + '</td><td>' + esc(m.label) + '</td><td>' + esc(m.to) + '</td><td class="wrap">' + esc(m.cc) + '</td><td class="wrap">' + esc(m.subject) + '</td><td class="c"><a data-act="mailview" data-id="' + m.id + '">Xem</a></td></tr>').join('') +
+    openModal('<div class="mdl lg" role="dialog"><div class="mdl-h">' + IC.mail + 'Hộp thư giả lập · mail hệ thống đã gửi (' + ms.length + ')<span class="cl" data-act="x">×</span></div><div class="mdl-b">' +
+      '<div class="gwrap" style="max-height:470px"><table class="grid nx"><thead><tr><th class="c">Thời gian gửi</th><th>Loại mail</th><th>To</th><th>CC</th><th>Tiêu đề</th><th class="c">Nội dung</th></tr></thead><tbody>' +
+      ms.map(m => '<tr><td class="c">' + fDT(m.at) + '</td><td>' + (m.type === 'TB' ? tagHTML('bl', 'mail', 'Mail khảo sát') : tagHTML('wa', 'bell', m.label)) + '</td><td>' + esc(m.to) + '</td><td class="wrap">' + esc(m.cc) + '</td><td class="wrap">' + esc(m.subject) + '</td><td class="c"><a data-act="mailview" data-id="' + m.id + '">Xem</a></td></tr>').join('') +
       '</tbody></table></div></div><div class="mdl-f"><button class="btn pri" data-act="x">Đóng</button></div></div>');
   }
 
@@ -1154,9 +1722,9 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     const s = getS(id); if (!s) return;
     closeAll();
     S.role = 'QLBP'; S.user = s.qlbp; S.screen = 'nhapks';
-    resetFilters(); renderAll();
+    resetOpen(); resetFilters(); renderAll();
     toast('Giả lập: ' + esc(s.qlbp) + ' bấm link trong mail → đăng nhập FTEL CMS → mở phiếu', 'info', 4500);
-    openSurvey(id, s.status === 'CHUA' ? 'edit' : 'view');
+    openSurvey(id, s.status !== 'AUTO' && S.now <= dueEnd(s) ? 'edit' : 'view');
   }
 
   /* ===== Toast ===== */
@@ -1175,17 +1743,23 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
   document.addEventListener('click', e => {
     const el = e.target.closest('[data-act]'); if (!el) return;
     const a = el.dataset.act, id = el.dataset.id;
+    if ((a === 'nav' || a === 'seeresult') && el.closest('#drawer')) $('#drawer').classList.remove('open');   // lối tắt kiểm thử trong drawer
     switch (a) {
-      case 'nav': S.screen = el.dataset.k; closeAll(); renderAll(); window.scrollTo(0, 0); break;
+      case 'nav': go(el.dataset.k); break;
+      case 'grp': UI.open[el.dataset.g] = !UI.open[el.dataset.g]; renderSide(); break;      // mở / thu nhóm menu
+      case 'ghost': toast(ghostTxt(el.dataset.k), 'info', 6000); break;
       case 'oos': toast('Ngoài phạm vi prototype', 'info', 1800); break;
       case 'search': applySearch(); break;
+      case 'chip': { const k = el.dataset.k, st = el.dataset.st; S.f[k].st = S.f[k].st === st ? '' : st; S.page[k] = 1; renderScreen(); break; }   // lọc nhanh theo trạng thái
       case 'export': exportExcel(); break;
+      case 'exportkq': exportKetQua(); break;
       case 'clr': { const sl = el.parentElement.querySelector('select'); sl.value = ''; sl.classList.add('ph'); break; }
       case 'pg': if (!el.classList.contains('dis')) { S.page[el.dataset.k] = +el.dataset.to; renderList(); } break;
       case 'reload': renderList(); toast('Đã tải lại danh sách', 'info', 1500); break;
       case 'survey': openSurvey(id, 'edit'); break;
       case 'view': openSurvey(id, 'view'); break;
-      case 'submit': submitSurvey(id); break;
+      case 'submit': submitSurvey(); break;
+      case 'seeresult': setRole('ADMIN|' + ADMIN_USER); go('ketqua'); break;      // lối tắt kiểm thử (drawer): xem Kết quả khảo sát bằng vai trò Admin
       case 'log': openLog(id); break;
       case 'mailview': openMailPreview(id); break;
       case 'gomail': goFromMail(id); break;
@@ -1197,7 +1771,7 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
       case 'notes': $('#drawer').classList.add('open'); break;
       case 'closenotes': $('#drawer').classList.remove('open'); break;
       case 'ptog': UI.ptMin = !UI.ptMin; renderProto(); break;
-      case 'reset': closeAll(); initData(); renderAll(); toast('Đã đặt lại dữ liệu mẫu', 'info'); break;
+      case 'reset': closeAll(); initData(); resetOpen(); renderAll(); toast('Đã đặt lại dữ liệu mẫu', 'info'); break;
       default: break;
     }
   });
@@ -1208,9 +1782,17 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
     if (ch === 'psize') { S.size[t.dataset.k] = +t.value; S.page[t.dataset.k] = 1; renderList(); }
     if (ch === 'pgin') { S.page[t.dataset.k] = parseInt(t.value, 10) || 1; renderList(); }
     if (ch === 'anno') { UI.anno = t.checked; document.body.classList.toggle('noanno', !UI.anno); }
-    if (t.name === 'q2') t.closest('.q').classList.remove('err');
+    if (F && F.mode === 'edit' && t.type === 'radio' && t.closest('.sv .q')) {     // chọn đáp án → tính lại thứ tự, hiện dần (BR16, BR17)
+      F.a[t.name] = +t.value;
+      const q = t.closest('.q'); q.classList.remove('err');
+      $$('.opt', q).forEach(o => o.classList.toggle('on', o.contains(t)));
+      layoutForm();
+    }
   });
-  document.addEventListener('input', e => { if (e.target.id === 'q1') e.target.closest('.q').classList.remove('err'); });
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (F && t.dataset && t.dataset.qin) { F.a[t.dataset.qin] = t.value; t.closest('.q').classList.remove('err'); }
+  });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { if ($('#mroot .mask')) closeModal(); else $('#drawer').classList.remove('open'); }
     if (e.key === 'Enter' && e.target.matches('.panel-b input')) applySearch();
@@ -1218,12 +1800,15 @@ body.noanno .anno,body.noanno .tag-new,body.noanno .gl,body.noanno .dx,body.noan
 
   /* ===== Khởi động ===== */
   initData();
+  resetOpen();
   renderAll();
 
   // Expose cho script override / kiểm thử
   window.KS = {
     get state() { return S; }, UI, onDraftReportCreated, createReport, sendMail, isDue, finalizeOverdue, runRemindJob, simulateReport,
-    setRole, scope, openSurvey, submitSurvey, openLog, logOf, renderAll, toast, stOf, dueDate, exportExcel, buildXlsxBlob, exportRow,
+    get form() { return F; }, QS, pathOf, visibleQs, RES_COLS,
+    setRole, scope, can, PERM, go, openSurvey, submitSurvey, openLog, logOf, renderAll, toast, stOf, dueDate, exportExcel, buildXlsxBlob, exportRow,
+    exportKetQua, KQ_COLS, kqExportRow, filterResults, defaultQ1, SITES, CUR, dueEnd,
     DEADLINE_DAYS, REMIND_DAYS, MAX_AUTO, REMIND_HOUR, AUTO_SCORE
   };
 })();
